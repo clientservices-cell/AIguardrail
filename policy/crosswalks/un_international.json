@@ -1,0 +1,122 @@
+{
+  "crosswalk": "Seed-First AI Act (draft v2) <-> UN and international instruments",
+  "external_instrument": "UN High-level Advisory Body on AI, 'Governing AI for Humanity' (final report, 2024); Global Digital Compact (2024); UNGA resolution 78/265 (2024); UNESCO Recommendation on the Ethics of AI (2021); UNDRIP (2007); UNCRC General Comment No. 25 (2021); Council of Europe Framework Convention on AI (CETS No. 225, 2024)",
+  "status": "Informational mapping for policy analysis. Not legal advice. Entries with verify=true need confirmation against primary sources.",
+  "relationship_vocabulary": {
+    "aligned": "Same objective and broadly equivalent commitment.",
+    "seed_first_extends": "Seed-First covers the commitment and extends its scope.",
+    "partial": "Overlapping but narrower or differently framed.",
+    "analogous": "Different mechanism serving a comparable function.",
+    "gap_in_external": "No corresponding commitment."
+  },
+  "entries": [
+    {
+      "seed_first_article": "Annex A(1)(b)",
+      "external_instrument": "HLAB-AI final report",
+      "external_provision": "Recommendation 1 (international scientific panel on AI)",
+      "relationship": "aligned",
+      "notes": "A scientific panel could supply the evidence base for Tier 1 Resource Budget methodologies.",
+      "guardrail_component": "Tier1 budget parameters",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Annex A(1)(c)",
+      "external_instrument": "HLAB-AI final report; Global Digital Compact",
+      "external_provision": "Recommendation 2 (policy dialogue on AI governance)",
+      "relationship": "analogous",
+      "notes": "A global dialogue offers a venue for mutual recognition of national ICT decisions.",
+      "guardrail_component": "(institutional)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Annex D",
+      "external_instrument": "HLAB-AI final report",
+      "external_provision": "Recommendation 3 (AI standards exchange)",
+      "relationship": "aligned",
+      "notes": "The machine-readable policy schema is a candidate interoperable standard.",
+      "guardrail_component": "seed_first_policy.schema.json",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Annex A(2); Annex C(3)",
+      "external_instrument": "HLAB-AI final report",
+      "external_provision": "Recommendations 4 and 5 (capacity development network; global fund for AI)",
+      "relationship": "aligned",
+      "notes": "The Global South Epistemic Protection Fund and AU capacity provisions pursue the same capacity and financing goals, with an added emphasis on community governance and language resources.",
+      "guardrail_component": "(institutional)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 2(4); Art. 4(4)",
+      "external_instrument": "HLAB-AI final report",
+      "external_provision": "Recommendation 6 (global AI data framework)",
+      "relationship": "seed_first_extends",
+      "notes": "Seed-First specifies collective data rights: cognitive sovereignty, FPIC and CARE.",
+      "guardrail_component": "Tier2 DATA_SOVEREIGNTY_BREACH",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Annex A(1)",
+      "external_instrument": "HLAB-AI final report",
+      "external_provision": "Recommendation 7 (AI office within the UN Secretariat)",
+      "relationship": "analogous",
+      "notes": "v2 prefers building on existing UN coordination over a new stand-alone High Commission.",
+      "guardrail_component": "(institutional)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 1(2); Art. 3(1)",
+      "external_instrument": "UNGA resolution 78/265",
+      "external_provision": "Safe, secure and trustworthy AI for sustainable development",
+      "relationship": "aligned",
+      "notes": "Shared framing of AI as serving sustainable development.",
+      "guardrail_component": "(purpose)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 3(1); Art. 4; Art. 5",
+      "external_instrument": "UNESCO Recommendation on the Ethics of AI",
+      "external_provision": "Values (incl. environment and ecosystem flourishing); policy areas on environment, gender, data policy",
+      "relationship": "aligned",
+      "notes": "UNESCO sets non-binding values and policy actions. Seed-First converts several of them into hard constraints.",
+      "guardrail_component": "Tier1, Tier2, Tier3",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 4(4); Art. 4(2)",
+      "external_instrument": "UNDRIP",
+      "external_provision": "Arts. 18, 19, 31, 32",
+      "relationship": "aligned",
+      "notes": "Participation in decision-making, free, prior and informed consent, and control over traditional knowledge.",
+      "guardrail_component": "Tier2 DATA_SOVEREIGNTY_BREACH, TEK_APPROPRIATION; community_consent_required",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 4(3)",
+      "external_instrument": "UNCRC General Comment No. 25",
+      "external_provision": "Children's rights in the digital environment",
+      "relationship": "aligned",
+      "notes": "Best interests of the child, protection from economic exploitation and harmful content, and data protection in digital services.",
+      "guardrail_component": "Tier3 CHILD_OR_MATERNAL_ENDANGERMENT",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Arts. 9, 14",
+      "external_instrument": "Council of Europe Framework Convention on AI (CETS No. 225)",
+      "external_provision": "Remedies, procedural safeguards, relationship with other human-rights protections",
+      "relationship": "aligned",
+      "notes": "Both instruments require accessible remedies and preserve stronger existing protections.",
+      "guardrail_component": "(institutional)",
+      "verify": true
+    },
+    {
+      "seed_first_article": "Art. 3(1)",
+      "external_instrument": "All of the above",
+      "external_provision": "(none)",
+      "relationship": "gap_in_external",
+      "notes": "No international instrument sets binding resource budgets for AI systems.",
+      "guardrail_component": "Tier1PlanetaryEvaluator",
+      "verify": false
+    }
+  ]
+}

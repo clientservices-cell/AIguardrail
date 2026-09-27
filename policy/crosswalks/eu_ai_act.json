@@ -1,0 +1,174 @@
+{
+  "crosswalk": "Seed-First AI Act (draft v2) <-> EU Artificial Intelligence Act",
+  "external_instrument": "Regulation (EU) 2024/1689 (Artificial Intelligence Act)",
+  "status": "Informational mapping for policy analysis. Not legal advice. Entries with verify=true need confirmation against the Official Journal text.",
+  "relationship_vocabulary": {
+    "aligned": "Same objective and broadly equivalent obligation.",
+    "seed_first_extends": "Seed-First covers the EU obligation and extends its scope.",
+    "partial": "Overlapping but narrower or differently framed.",
+    "analogous": "Different mechanism serving a comparable function.",
+    "gap_in_external": "No corresponding EU obligation."
+  },
+  "entries": [
+    {
+      "seed_first_article": "Art. 3(3)(c)",
+      "external_provision": "Art. 5(1)(a)-(b)",
+      "relationship": "aligned",
+      "notes": "EU prohibits manipulative or deceptive techniques and exploitation of vulnerabilities (age, disability, social or economic situation) causing significant harm.",
+      "guardrail_component": "Tier3 COGNITIVE_MANIPULATION",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 5(2)",
+      "external_provision": "Art. 5(1)(c)",
+      "relationship": "seed_first_extends",
+      "notes": "EU prohibits social scoring leading to detrimental or unfavourable treatment. Seed-First extends the prohibition explicitly to biological, genetic, ecological and carbon metrics.",
+      "guardrail_component": "Tier3 RELATIONAL_SCORING",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 3(3)(b)",
+      "external_provision": "Art. 5(1)(e), (f), (h)",
+      "relationship": "partial",
+      "notes": "EU prohibits untargeted facial-image scraping, emotion recognition in workplaces and education, and (with exceptions) real-time remote biometric identification for law enforcement. Seed-First's freedom from arbitrary surveillance is broader and technology-neutral.",
+      "guardrail_component": "Tier3 COERCIVE_SURVEILLANCE",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 4(3)",
+      "external_provision": "Art. 5(1)(b); Art. 9(9)",
+      "relationship": "seed_first_extends",
+      "notes": "EU addresses exploitation of age-related vulnerabilities and requires risk-management attention to minors. Seed-First adds an express prohibition on commodifying or sexualising children and on engagement design that exploits their developmental vulnerabilities.",
+      "guardrail_component": "Tier3 CHILD_OR_MATERNAL_ENDANGERMENT",
+      "verify": true
+    },
+    {
+      "seed_first_article": "Art. 4(2)",
+      "external_provision": "Art. 10(3)-(4)",
+      "relationship": "aligned",
+      "notes": "EU data-governance rules require training data to take account of the geographical, contextual, behavioural and functional setting of use.",
+      "guardrail_component": "Process obligation (not enforced at inference time)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 3(1)",
+      "external_provision": "Art. 53(1)(a) and Annex XI; Art. 40(2); Art. 95",
+      "relationship": "gap_in_external",
+      "notes": "EU requires documentation of known or estimated energy consumption for general-purpose AI models, standardisation work on resource performance, and voluntary codes on environmental sustainability. It sets no binding resource budgets. Seed-First Tier 1 budgets would be new.",
+      "guardrail_component": "Tier1PlanetaryEvaluator, ComputeBudget",
+      "verify": true
+    },
+    {
+      "seed_first_article": "Art. 5(1)",
+      "external_provision": "Art. 14",
+      "relationship": "partial",
+      "notes": "EU human-oversight requirements (including the ability to disregard, override or interrupt the system) support 'constraint, not command' from the operator's side. Seed-First also constrains how outputs address affected persons.",
+      "guardrail_component": "Tier2 COMMAND_NOT_CONSTRAINT; AGENCY_DISPLACEMENT judge",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 5(3)",
+      "external_provision": "(none; cf. Charter of Fundamental Rights Arts. 11-12)",
+      "relationship": "gap_in_external",
+      "notes": "No specific AI Act prohibition on using AI to identify or suppress non-violent dissent. Protection currently relies on fundamental-rights law.",
+      "guardrail_component": "Tier3 DISSENT_SUPPRESSION",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 4(4)",
+      "external_provision": "(none)",
+      "relationship": "gap_in_external",
+      "notes": "EU data protection is individual-centred. There is no collective Indigenous data-governance or FPIC requirement.",
+      "guardrail_component": "Tier2 DATA_SOVEREIGNTY_BREACH, TEK_APPROPRIATION",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 6(2)",
+      "external_provision": "Arts. 57-60",
+      "relationship": "analogous",
+      "notes": "AI regulatory sandboxes and real-world testing provide supervised pre-deployment testing. Seed-First adds a worst-case (maximin) pass criterion and consent-based pilots for high-impact structural policies.",
+      "guardrail_component": "SiliconSimulationEngine",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 7(2)",
+      "external_provision": "Art. 14(4)(e); Art. 79",
+      "relationship": "analogous",
+      "notes": "EU requires the ability to interrupt a high-risk system via a stop procedure and gives national authorities powers over systems presenting a risk. Seed-First adds automated circuit breakers with due-process limits.",
+      "guardrail_component": "CircuitBreaker",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 9",
+      "external_provision": "Arts. 50, 85, 86",
+      "relationship": "aligned",
+      "notes": "Transparency of AI interaction, right to lodge a complaint, and right to explanation of individual decisions based on high-risk systems.",
+      "guardrail_component": "GuardrailDecision reasons; audit trail",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 10(1)",
+      "external_provision": "Arts. 49, 71",
+      "relationship": "aligned",
+      "notes": "Registration in the EU database for high-risk AI systems.",
+      "guardrail_component": "(institutional)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 10(2)",
+      "external_provision": "Arts. 12, 19, 26(6)",
+      "relationship": "aligned",
+      "notes": "Automatic logging and log retention by providers and deployers. Seed-First defaults to digests rather than personal data.",
+      "guardrail_component": "AuditLogger, JsonlFileAuditSink",
+      "verify": true
+    },
+    {
+      "seed_first_article": "Art. 11",
+      "external_provision": "Art. 27; Directive (EU) 2022/2464 (CSRD)",
+      "relationship": "seed_first_extends",
+      "notes": "The fundamental-rights impact assessment for certain deployers and corporate sustainability reporting. The IIA adds the four seed-stock pillars and is designed to integrate with both.",
+      "guardrail_component": "SeedStockReport (supporting evidence)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 12(1)",
+      "external_provision": "Art. 73",
+      "relationship": "aligned",
+      "notes": "Serious-incident reporting; the general deadline is 15 days.",
+      "guardrail_component": "Audit trail",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 12(2)",
+      "external_provision": "Art. 87; Directive (EU) 2019/1937",
+      "relationship": "aligned",
+      "notes": "Whistleblower protection.",
+      "guardrail_component": "(institutional)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 8(2)-(3)",
+      "external_provision": "Art. 99",
+      "relationship": "aligned",
+      "notes": "Fines of up to EUR 35m or 7% of worldwide turnover for prohibited practices and EUR 15m or 3% for other obligations, with the lower amount for SMEs. Seed-First mirrors this structure and adds restoration orders.",
+      "guardrail_component": "(institutional)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 13",
+      "external_provision": "Art. 2(12); Art. 53(2); Art. 62",
+      "relationship": "aligned",
+      "notes": "Open-source exclusions and exemptions, and SME support measures.",
+      "guardrail_component": "(institutional)",
+      "verify": true
+    },
+    {
+      "seed_first_article": "Art. 1(4)",
+      "external_provision": "Art. 2(6)",
+      "relationship": "partial",
+      "notes": "EU excludes AI developed and put into service solely for scientific research. Seed-First keeps Tier 3 and child protections applicable even in research.",
+      "guardrail_component": "(scope)",
+      "verify": false
+    }
+  ]
+}

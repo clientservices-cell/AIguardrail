@@ -1,0 +1,30 @@
+{
+  "$schema": "../../src/seed_first_guardrail/schemas/seed_first_policy.schema.json",
+  "metadata": {
+    "policy_id": "example-tillit-municipal-services",
+    "version": "1.0.0",
+    "issuer": "Illustrative municipal services board (example only)",
+    "instrument": "EU_REGULATION",
+    "effective_from": "2026-10-01"
+  },
+  "tier_1_planetary_boundaries": {
+    "max_compute_kwh_per_job": 1.0,
+    "carbon_intensity_threshold_g_co2_kwh": 100,
+    "resource_exhaustion_circuit_breaker": true,
+    "max_cumulative_kwh": 200,
+    "default_carbon_intensity_g_co2_kwh": 30
+  },
+  "tier_2_community_sovereignty": {
+    "jurisdiction_id": "NO",
+    "community_consent_required": false,
+    "cultural_context_framework": "TILLIT"
+  },
+  "tier_3_inviolable_floor": {
+    "allow_human_degradation_tradeoff": false,
+    "allow_surveillance_coercion": false,
+    "allow_relational_scoring": false,
+    "child_protection_override": true
+  },
+  "circuit_breaker": { "violation_threshold": 5, "window_seconds": 300, "cooldown_seconds": 600 },
+  "governance": { "fail_closed": true, "judge_threshold": 0.4, "audit_include_text": false, "screen_prompts": false }
+}

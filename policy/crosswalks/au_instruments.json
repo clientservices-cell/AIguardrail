@@ -1,0 +1,104 @@
+{
+  "crosswalk": "Seed-First AI Act (draft v2) <-> African Union instruments",
+  "external_instrument": "AU Continental Artificial Intelligence Strategy (2024); Digital Transformation Strategy for Africa 2020-2030; AU Data Policy Framework (2022); AU Convention on Cyber Security and Personal Data Protection (Malabo Convention, 2014); African Charter on Human and Peoples' Rights (1981); African Charter on the Rights and Welfare of the Child (1990)",
+  "status": "Informational mapping for policy analysis. Not legal advice. Entries with verify=true need confirmation against primary sources.",
+  "relationship_vocabulary": {
+    "aligned": "Same objective and broadly equivalent commitment.",
+    "seed_first_extends": "Seed-First covers the commitment and extends its scope.",
+    "partial": "Overlapping but narrower or differently framed.",
+    "analogous": "Different mechanism serving a comparable function.",
+    "gap_in_external": "No corresponding commitment."
+  },
+  "entries": [
+    {
+      "seed_first_article": "Annex C(1)-(2)",
+      "external_instrument": "AU Continental AI Strategy",
+      "external_provision": "Development-oriented, Africa-centric AI governance",
+      "relationship": "aligned",
+      "notes": "Both frame AI around African development priorities and local ownership. Check the strategy's specific principles and action areas before citing them.",
+      "guardrail_component": "Tier2 UBUNTU context pack",
+      "verify": true
+    },
+    {
+      "seed_first_article": "Annex C(3); Annex A(2)",
+      "external_instrument": "Digital Transformation Strategy for Africa 2020-2030",
+      "external_provision": "Digital infrastructure, skills and financing",
+      "relationship": "aligned",
+      "notes": "Capacity and infrastructure financing for local compute, data and language resources.",
+      "guardrail_component": "(institutional)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 2(4); Art. 4(4)",
+      "external_instrument": "AU Data Policy Framework",
+      "external_provision": "Data sovereignty and value creation on the continent",
+      "relationship": "seed_first_extends",
+      "notes": "Seed-First adds community-level (not only state-level) cognitive sovereignty and CARE-based Indigenous data rights.",
+      "guardrail_component": "Tier2 DATA_SOVEREIGNTY_BREACH",
+      "verify": true
+    },
+    {
+      "seed_first_article": "Art. 10(2); Art. 9",
+      "external_instrument": "Malabo Convention",
+      "external_provision": "Personal data protection principles and data-subject rights",
+      "relationship": "aligned",
+      "notes": "Digest-only audit logs by default minimise personal data processing.",
+      "guardrail_component": "AuditLogger (include_text=False)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Annex C(1); Art. 5(4)",
+      "external_instrument": "African Charter on Human and Peoples' Rights",
+      "external_provision": "Arts. 27-29 (duties of the individual to family, community and society)",
+      "relationship": "aligned",
+      "notes": "The Charter's relational duties ground Ubuntu governance. Seed-First adds that relational duties never override Tier 3 individual rights.",
+      "guardrail_component": "Tier precedence (Tier 3 > Tier 2)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 3(1)",
+      "external_instrument": "African Charter on Human and Peoples' Rights",
+      "external_provision": "Art. 24 (right to a general satisfactory environment)",
+      "relationship": "seed_first_extends",
+      "notes": "Tier 1 budgets operationalise the environmental right for AI systems.",
+      "guardrail_component": "Tier1PlanetaryEvaluator",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Annex A(2)",
+      "external_instrument": "African Charter on Human and Peoples' Rights",
+      "external_provision": "Art. 22 (right to economic, social and cultural development)",
+      "relationship": "aligned",
+      "notes": "The Epistemic Protection Fund and equity-sensitive budget allocation respect development needs.",
+      "guardrail_component": "(institutional)",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 3(3)",
+      "external_instrument": "African Commission on Human and Peoples' Rights",
+      "external_provision": "Resolution 473 (2021) on human and peoples' rights and AI, robotics and emerging technologies",
+      "relationship": "aligned",
+      "notes": "The Commission called for study and rights-based governance of AI in Africa.",
+      "guardrail_component": "Tier3InviolableEvaluator",
+      "verify": true
+    },
+    {
+      "seed_first_article": "Art. 4(3)",
+      "external_instrument": "African Charter on the Rights and Welfare of the Child",
+      "external_provision": "Protection from economic exploitation, abuse and harmful practices",
+      "relationship": "aligned",
+      "notes": "Child protection as an inviolable floor.",
+      "guardrail_component": "Tier3 CHILD_OR_MATERNAL_ENDANGERMENT",
+      "verify": false
+    },
+    {
+      "seed_first_article": "Art. 3(1)",
+      "external_instrument": "All of the above",
+      "external_provision": "(none)",
+      "relationship": "gap_in_external",
+      "notes": "No AU instrument sets binding resource budgets for AI systems.",
+      "guardrail_component": "Tier1PlanetaryEvaluator",
+      "verify": false
+    }
+  ]
+}
