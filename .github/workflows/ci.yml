@@ -22,8 +22,8 @@ jobs:
           python-version: "3.13"
           cache: pip
       - run: pip install -e ".[dev]"
-      - run: ruff check src tests examples
-      - run: ruff format --check src tests examples
+      - run: ruff check src tests examples docs/build
+      - run: ruff format --check src tests examples docs/build
       - run: mypy
 
   test:
@@ -58,3 +58,28 @@ jobs:
       - run: python -m build
       - name: Check wheel contains schema
         run: python -c "import zipfile,glob,sys; n=zipfile.ZipFile(glob.glob('dist/*.whl')[0]).namelist(); sys.exit(0 if 'seed_first_guardrail/schemas/seed_first_policy.schema.json' in n else 1)"
+
+  docs:
+    # Builds the Word versions of the docs (without the Windows-only Word step) so a
+    # Markdown change that breaks the converter is caught. build.py fails on invalid
+    # packages, leftover equation placeholders or garbled characters.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: docs/build/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: npm ci --prefix docs/build
+      - run: pip install -r docs/build/requirements.txt
+      - run: python docs/build/build.py --no-word
+      - uses: actions/upload-artifact@v4
+        with:
+          name: word-documents
+          path: docs/build/out/*.docx
+          retention-days: 14

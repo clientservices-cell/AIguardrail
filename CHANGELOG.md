@@ -17,6 +17,7 @@ First release, built from the SEED-FIRST-GUARDRAIL-v1.0 handoff and the Seed-Fir
 - **Adapters and CLI:** OpenAI, Anthropic, LangChain and LlamaIndex adapters; `seed-first-guardrail` CLI.
 - **Policy artefacts:** policy JSON Schema, three example policies, a JSON-LD (ODRL) policy, and crosswalks to the EU, UN and AU instruments.
 - **Documentation:** revised framework (v2), revised Act (draft v2) with change log, research dossier, regulatory annex, architecture and API docs.
+- **Word document build (`docs/build`):** generates styled .docx versions of the Act, framework, dossier and annex from their Markdown sources, with native Word equations, an optional Word finalise step, output checks, and a CI job that uploads the documents as an artifact.
 
 ### Fixed relative to the handoff baseline
 

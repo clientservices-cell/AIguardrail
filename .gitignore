@@ -2,8 +2,8 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
-build/
-dist/
+/build/
+/dist/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
@@ -13,3 +13,7 @@ dist/
 htmlcov/
 coverage.xml
 *.jsonl
+
+# Word document build (docs/build)
+docs/build/node_modules/
+docs/build/out/

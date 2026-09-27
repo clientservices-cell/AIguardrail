@@ -1,0 +1,16 @@
+{
+  "input": "../../regulatory_annex.md",
+  "fileName": "Seed-First_Regulatory_Annex.docx",
+  "kicker": "REGULATORY ANNEX  ·  PHASE 2",
+  "title": "Machine-Readable Policy and Legal Crosswalks",
+  "subtitle": "How the Seed-First policy schema enforces the Act, and how the Act maps to EU, UN and AU instruments",
+  "description": "Covers the enforceable JSON schema, the ODRL JSON-LD policy, and crosswalks to the EU AI Act, UN and international instruments, and African Union instruments.",
+  "dateLine": "26 September 2026  ·  SEED-FIRST-GUARDRAIL-v1.0",
+  "header": "Regulatory Annex  ·  Seed-First AI Guardrail  ·  Not legal advice",
+  "docTitle": "Regulatory Annex — Machine-Readable Policy and Legal Crosswalks",
+  "docDescription": "Phase 2 regulatory annex for the Seed-First AI Guardrail",
+  "tableWidths": {
+    "File": [3000, 6026],
+    "Seed-First": [3300, 3726, 2000]
+  }
+}

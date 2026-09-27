@@ -1,0 +1,14 @@
+{
+  "name": "seed-first-docs-build",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Builds Word versions of the Seed-First documents from their Markdown sources. Run via build.py.",
+  "license": "CC0-1.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "docx": "9.7.2",
+    "jszip": "3.10.2"
+  }
+}

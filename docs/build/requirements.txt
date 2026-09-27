@@ -1,0 +1,3 @@
+# Python dependencies for docs/build/build.py (not needed by the seed_first_guardrail package).
+lxml>=5
+pypandoc_binary>=1.13   # bundles pandoc, used to typeset LaTeX as native Word equations

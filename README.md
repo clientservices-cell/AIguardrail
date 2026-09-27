@@ -103,6 +103,8 @@ seed-first-guardrail check --policy policy/examples/tillit.policy.json \
 | [Architecture](docs/architecture.md) | Request flow, modules, design decisions |
 | [API reference](docs/api.md) | Every public class, function and block code |
 
+Word (.docx) versions of the Act, framework, dossier and annex are built from these Markdown files by [`docs/build`](docs/build/README.md): run `python docs/build/build.py`. CI also attaches them to each run as a downloadable artifact.
+
 ## Development
 
 ```bash

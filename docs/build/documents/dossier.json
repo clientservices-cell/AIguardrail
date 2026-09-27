@@ -1,0 +1,19 @@
+{
+  "input": "../../research_dossier.md",
+  "fileName": "Seed-First_Research_Dossier.docx",
+  "mathEngine": "pandoc",
+  "kicker": "RESEARCH DOSSIER  ·  PHASE 1",
+  "title": "From Relational Ethics to Enforceable Constraints",
+  "subtitle": "Formal model, Seed-Stock metrics and indicator matrices for the Seed-First AI Guardrail",
+  "description": "Formalises the Seed-First framework as a constrained optimisation problem, defines the four Seed-Stock metrics, and maps Ubuntu, tillit and the CARE principles to indicators and guardrail rules.",
+  "dateLine": "26 September 2026  ·  SEED-FIRST-GUARDRAIL-v1.0",
+  "header": "Research Dossier  ·  Seed-First AI Guardrail  ·  For discussion",
+  "docTitle": "Research Dossier — From Relational Ethics to Enforceable Constraints",
+  "docDescription": "Phase 1 research dossier for the Seed-First AI Guardrail",
+  "pageBreakBefore": "^References",
+  "tableWidths": {
+    "Metric": [1500, 3763, 3763],
+    "Principle": [1650, 2150, 2226, 3000],
+    "Pillar": [1700, 7326]
+  }
+}
