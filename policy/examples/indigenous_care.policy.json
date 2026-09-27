@@ -1,0 +1,34 @@
+{
+  "$schema": "../../src/seed_first_guardrail/schemas/seed_first_policy.schema.json",
+  "metadata": {
+    "policy_id": "example-care-data-governance",
+    "version": "1.0.0",
+    "issuer": "Illustrative Indigenous data governance authority (example only)",
+    "instrument": "UN_MODEL_LAW",
+    "effective_from": "2026-10-01"
+  },
+  "tier_1_planetary_boundaries": {
+    "max_compute_kwh_per_job": 0.5,
+    "carbon_intensity_threshold_g_co2_kwh": 300
+  },
+  "tier_2_community_sovereignty": {
+    "jurisdiction_id": "GLOBAL-CARE",
+    "community_consent_required": true,
+    "cultural_context_framework": "INDIGENOUS_CARE",
+    "custom_rules": [
+      {
+        "id": "SACRED_SITE_LOCATIONS",
+        "pattern": "\\b(?:coordinates|location|map)\\s+(?:[\\w'-]+\\s+){0,3}sacred\\s+sites?\\b",
+        "unless": "\\bauthori[sz]ed\\s+by\\s+(?:the\\s+)?(?:nation|elders|community)\\b",
+        "reason": "Sacred site locations may be disclosed only with the authority of the nation (CARE: Authority to control)."
+      }
+    ]
+  },
+  "tier_3_inviolable_floor": {
+    "allow_human_degradation_tradeoff": false,
+    "allow_surveillance_coercion": false,
+    "allow_relational_scoring": false,
+    "child_protection_override": true
+  },
+  "governance": { "fail_closed": true, "audit_include_text": false }
+}

@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/seed-first/seed-first-guardrail/schemas/seed_first_policy.schema.json",
+  "title": "SeedFirstPolicySpec",
+  "description": "Machine-readable compliance policy for the Seed-First AI Act (model convention, v2). Tier numbering follows Art. 3; Tier 3 fields are fixed by the Act and cannot be relaxed.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policy_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string" },
+        "issuer": { "type": "string", "description": "Community council, regulator or deployer that issued the policy (Art. 3(2))." },
+        "instrument": { "type": "string", "enum": ["UN_MODEL_LAW", "EU_REGULATION", "AU_CONVENTION", "VOLUNTARY"] },
+        "effective_from": { "type": "string", "format": "date" }
+      }
+    },
+    "tier_1_planetary_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_compute_kwh_per_job": { "type": "number", "exclusiveMinimum": 0 },
+        "carbon_intensity_threshold_g_co2_kwh": { "type": "number", "exclusiveMinimum": 0 },
+        "resource_exhaustion_circuit_breaker": { "type": "boolean", "default": true },
+        "max_cumulative_kwh": { "type": "number", "exclusiveMinimum": 0, "description": "Rolling resource budget assigned to the deployer (Art. 3(1)(b))." },
+        "max_water_liters_per_job": { "type": "number", "exclusiveMinimum": 0 },
+        "default_carbon_intensity_g_co2_kwh": { "type": "number", "minimum": 0, "description": "Grid intensity assumed when the caller supplies none." }
+      },
+      "required": ["max_compute_kwh_per_job", "carbon_intensity_threshold_g_co2_kwh"]
+    },
+    "tier_2_community_sovereignty": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "jurisdiction_id": { "type": "string", "minLength": 1 },
+        "community_consent_required": { "type": "boolean", "default": false },
+        "cultural_context_framework": {
+          "type": "string",
+          "enum": ["UBUNTU", "TILLIT", "INDIGENOUS_CARE", "RELATIONAL_COMMONWEALTH"]
+        },
+        "custom_rules": {
+          "type": "array",
+          "description": "Community-defined rules (Art. 3(2)(a)). Each pattern is a case-insensitive regular expression.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+              "pattern": { "type": "string", "minLength": 1 },
+              "unless": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 }
+            },
+            "required": ["id", "pattern", "reason"]
+          }
+        }
+      },
+      "required": ["jurisdiction_id", "cultural_context_framework"]
+    },
+    "tier_3_inviolable_floor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow_human_degradation_tradeoff": { "type": "boolean", "const": false },
+        "allow_surveillance_coercion": { "type": "boolean", "const": false },
+        "allow_relational_scoring": { "type": "boolean", "const": false },
+        "child_protection_override": { "type": "boolean", "const": true }
+      },
+      "required": ["allow_human_degradation_tradeoff", "allow_surveillance_coercion"]
+    },
+    "simulation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "require_simulation_for_macro_policy": { "type": "boolean", "default": true },
+        "runs": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "worst_case_floor": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "circuit_breaker": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "violation_threshold": { "type": "integer", "minimum": 1 },
+        "window_seconds": { "type": "number", "exclusiveMinimum": 0 },
+        "cooldown_seconds": { "type": "number", "minimum": 0 }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fail_closed": { "type": "boolean", "default": true },
+        "min_seed_stock_score": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "judge_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "audit_include_text": { "type": "boolean", "default": false },
+        "screen_prompts": { "type": "boolean", "default": true, "description": "Screen prompts against Tier 3 before calling the model. Completions are always screened." }
+      }
+    }
+  },
+  "required": ["tier_1_planetary_boundaries", "tier_2_community_sovereignty", "tier_3_inviolable_floor"]
+}

@@ -1,0 +1,68 @@
+{
+  "@context": [
+    "http://www.w3.org/ns/odrl.jsonld",
+    {
+      "sf": "urn:seed-first:vocab#",
+      "dct": "http://purl.org/dc/terms/",
+      "sf:tier": { "@type": "@id" },
+      "sf:article": { "@type": "xsd:string" },
+      "xsd": "http://www.w3.org/2001/XMLSchema#"
+    }
+  ],
+  "@type": "Set",
+  "uid": "urn:seed-first:policy:reference-v2",
+  "profile": "urn:seed-first:odrl-profile:v2",
+  "dct:title": "Seed-First AI Act (draft v2) - reference policy in ODRL",
+  "dct:description": "Semantic representation of the three-tier Seed-First policy. The operational (enforced) form is the JSON document validated by seed_first_policy.schema.json; this JSON-LD form supports linked-data publication and cross-regime reasoning (Annex D(1)).",
+  "target": "urn:seed-first:asset:ai-system",
+  "permission": [
+    {
+      "uid": "urn:seed-first:rule:tier1-execute-within-budget",
+      "action": "use",
+      "sf:tier": "sf:Tier1Planetary",
+      "sf:article": "Art. 3(1)",
+      "constraint": [
+        { "leftOperand": "sf:energyPerJobKWh", "operator": "lteq", "rightOperand": { "@value": "100", "@type": "xsd:decimal" } },
+        { "leftOperand": "sf:gridCarbonIntensityGCO2PerKWh", "operator": "lteq", "rightOperand": { "@value": "200", "@type": "xsd:decimal" } }
+      ],
+      "duty": [
+        { "action": "sf:reportResourceUse", "sf:article": "Art. 3(1)(c)" },
+        { "action": "sf:logDecision", "sf:article": "Art. 10(2)" }
+      ]
+    },
+    {
+      "uid": "urn:seed-first:rule:tier2-community-action",
+      "action": "sf:affectCommunity",
+      "sf:tier": "sf:Tier2Community",
+      "sf:article": "Art. 3(2)",
+      "duty": [
+        { "action": "sf:obtainCommunityConsent", "sf:article": "Art. 3(2)(c)" }
+      ]
+    },
+    {
+      "uid": "urn:seed-first:rule:macro-policy",
+      "action": "sf:proposeHighImpactStructuralPolicy",
+      "sf:article": "Art. 6(2)",
+      "duty": [
+        { "action": "sf:passWorstCaseSimulation", "sf:article": "Art. 6(2)(a)" },
+        { "action": "sf:runConsentedPilotWithSafetyNet", "sf:article": "Art. 6(2)(b)" },
+        { "action": "sf:publishSimulationResults", "sf:article": "Art. 6(3)" }
+      ]
+    }
+  ],
+  "prohibition": [
+    { "uid": "urn:seed-first:rule:no-human-degradation-tradeoff", "action": "sf:tradeHumanDignityForUtility", "sf:tier": "sf:Tier3Inviolable", "sf:article": "Art. 3(3)" },
+    { "uid": "urn:seed-first:rule:no-surveillance-coercion", "action": "sf:surveilOrCoerceForCompliance", "sf:tier": "sf:Tier3Inviolable", "sf:article": "Art. 3(3)(b)-(c)" },
+    { "uid": "urn:seed-first:rule:no-relational-scoring", "action": "sf:scorePersonsToRestrictRights", "sf:tier": "sf:Tier3Inviolable", "sf:article": "Art. 5(2)" },
+    { "uid": "urn:seed-first:rule:no-dissent-suppression", "action": "sf:identifyOrSuppressDissent", "sf:tier": "sf:Tier3Inviolable", "sf:article": "Art. 5(3)" },
+    { "uid": "urn:seed-first:rule:child-protection", "action": "sf:exploitCommodifyOrSexualiseChildren", "sf:tier": "sf:Tier3Inviolable", "sf:article": "Art. 4(3)" },
+    { "uid": "urn:seed-first:rule:no-short-termist-extraction", "action": "sf:sacrificeSeedStockForShortHorizonMetric", "sf:tier": "sf:Tier3Inviolable", "sf:article": "Art. 6(1)" },
+    {
+      "uid": "urn:seed-first:rule:no-indigenous-data-without-fpic",
+      "action": "sf:useIndigenousDataOrKnowledge",
+      "sf:tier": "sf:Tier2Community",
+      "sf:article": "Art. 4(4)",
+      "remedy": [ { "action": "sf:obtainFreePriorInformedConsentAndBenefitSharing" } ]
+    }
+  ]
+}
