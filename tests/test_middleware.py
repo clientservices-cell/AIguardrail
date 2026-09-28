@@ -69,7 +69,8 @@ async def test_prompt_screen_blocks_before_model(make_guardrail: Factory) -> Non
     async def model(_: str) -> str:
         raise AssertionError("model must not run")
 
-    decision = await make_guardrail().inspect_and_execute("consume seed stock", model)
+    g = make_guardrail(PolicyConfig(screen_prompts=True))
+    decision = await g.inspect_and_execute("consume seed stock", model)
     assert decision.tier is FrameworkTier.TIER_3_INVIOLABLE_HUMAN_FLOOR
 
 
@@ -142,8 +143,14 @@ async def test_seed_stock_floor(make_guardrail: Factory) -> None:
 async def test_judge_function_is_wrapped(make_guardrail: Factory) -> None:
     async def judge(prompt: str) -> str:
         flagged = "tillit" in prompt
+        nonce = prompt.split('"nonce": "')[1].split('"')[0]
         return json.dumps(
-            {"violation": flagged, "score": 0.9 if flagged else 0.0, "rationale": "x"}
+            {
+                "nonce": nonce,
+                "violation": flagged,
+                "score": 0.9 if flagged else 0.0,
+                "rationale": "x",
+            }
         )
 
     g = make_guardrail(judge=judge)
@@ -153,14 +160,50 @@ async def test_judge_function_is_wrapped(make_guardrail: Factory) -> None:
 
 
 async def test_judge_evaluator_instance_and_pass_metadata(make_guardrail: Factory) -> None:
-    async def judge(_: str) -> str:
-        return '{"violation": false, "score": 0.0, "rationale": ""}'
+    async def judge(prompt: str) -> str:
+        nonce = prompt.split('"nonce": "')[1].split('"')[0]
+        score = 0.4  # passing, but above the near-miss line (0.6 x threshold 0.5)
+        return json.dumps({"nonce": nonce, "violation": False, "score": score, "rationale": ""})
 
     ev = LLMJudgeEvaluator(judge)
     g = make_guardrail(judge=ev)
     assert g.judge_eval is ev
     decision = await g.inspect_and_execute("q", model_returning(SAFE))
-    assert decision.governance_metadata["judge"] == "PASS"
+    meta = decision.governance_metadata
+    assert meta["judge"] == "PASS" and meta["near_miss"] is True
+    assert set(meta["judge_scores"]) == {
+        "dignity_tradeoff",
+        "justification_laundering",
+        "tillit_erosion",
+        "agency_displacement",
+    }
+
+
+async def test_capability_monitoring_is_recorded_not_blocking(make_guardrail: Factory) -> None:
+    async def judge(prompt: str) -> str:
+        nonce = prompt.split('"nonce": "')[1].split('"')[0]
+        if '"mode"' in prompt:
+            return json.dumps({"nonce": nonce, "context": "learning", "mode": "substitute"})
+        return json.dumps({"nonce": nonce, "violation": False, "score": 0.0, "rationale": ""})
+
+    g = make_guardrail(PolicyConfig(capability_monitoring=True), judge=judge)
+    decision = await g.inspect_and_execute("Solve my homework", model_returning("x = 4"))
+    assert decision.approved
+    assert decision.governance_metadata["capability"] == {
+        "context": "learning",
+        "mode": "substitute",
+    }
+
+
+async def test_record_actual_energy_reconciles_budget(make_guardrail: Factory) -> None:
+    g = make_guardrail(PolicyConfig(max_cumulative_kwh=10.0))
+    d = await g.inspect_and_execute("q", model_returning(SAFE), estimated_kwh=1.0)
+    g.record_actual_energy(d, 3.0)
+    assert g.budget.used_kwh == pytest.approx(3.0)
+    g.record_actual_energy(d, 0.5)
+    assert g.budget.used_kwh == pytest.approx(0.5)
+    with pytest.raises(ValueError):
+        g.record_actual_energy(d, float("nan"))
 
 
 class Exploding:
@@ -213,14 +256,15 @@ async def test_extra_evaluators_run_in_their_phase(make_guardrail: Factory) -> N
 
 
 async def test_circuit_breaker_opens_and_refuses(make_guardrail: Factory, clock: FakeClock) -> None:
-    breaker = CircuitBreaker(threshold=2, window_s=60, cooldown_s=30, clock=clock)
+    breaker = CircuitBreaker(threshold=2, window_s=60, cooldown_s=30, min_principals=2, clock=clock)
     g = make_guardrail(circuit_breaker=breaker)
-    for _ in range(2):
-        await g.inspect_and_execute("q", model_returning(HARMFUL))
-    refused = await g.inspect_and_execute("q", model_returning(SAFE))
+    for who in ("a", "b"):
+        await g.inspect_and_execute("q", model_returning(HARMFUL), principal=who)
+    refused = await g.inspect_and_execute("q", model_returning(SAFE), principal="c")
     assert refused.tier is FrameworkTier.CIRCUIT_BREAKER
     assert refused.code == "CIRCUIT_OPEN"
-    assert "POPULATION_HARM" in refused.reason
+    assert "POPULATION_HARM" not in refused.reason  # generic: no other user's details (AR-11)
+    assert refused.to_dict()["contest_ref"].startswith("contest:")
 
     clock.advance(31)
     ok = await g.inspect_and_execute("q", model_returning(SAFE))

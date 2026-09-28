@@ -4,8 +4,11 @@
     guarded = GuardedOpenAI(AsyncOpenAI(), SeedFirstGuardrailProxy(config))
     response = await guarded.chat.completions.create(model="...", messages=[...])
 
-Blocked requests raise :class:`GuardrailViolation`. Streaming is not supported,
-because the completion must be screened in full before anyone sees it.
+Every channel is screened: message text, tool results and assistant tool-call history on
+the way in; **all** choices, ``tool_calls`` arguments, legacy ``function_call`` and
+``refusal`` on the way out. Images, audio and files are refused unless the policy sets
+``unscreenable_content='allow'`` (review AR-01). Blocked requests raise
+:class:`GuardrailViolation`. Streaming is not supported.
 """
 
 from __future__ import annotations
@@ -13,14 +16,8 @@ from __future__ import annotations
 from typing import Any
 
 from ..middleware import SeedFirstGuardrailProxy
-from ._common import guarded_call, messages_to_prompt
-
-
-def _completion_text(response: Any) -> str:
-    choices = getattr(response, "choices", None) or []
-    if not choices:
-        return ""
-    return getattr(choices[0].message, "content", None) or ""
+from ._channels import openai_request, openai_response
+from ._common import guarded_call
 
 
 class _Completions:
@@ -35,13 +32,13 @@ class _Completions:
                 "GuardedOpenAI does not support stream=True; completions must be "
                 "screened in full before release."
             )
-        prompt = messages_to_prompt(kwargs.get("messages", []))
         response, _ = await guarded_call(
             self._owner.guardrail,
-            prompt,
-            lambda: self._owner.client.chat.completions.create(**kwargs),
-            _completion_text,
+            openai_request(kwargs),
+            lambda: self._owner._client.chat.completions.create(**kwargs),
+            openai_response,
             guardrail_options,
+            meter_energy=self._owner.meter_energy,
         )
         return response
 
@@ -52,7 +49,10 @@ class _Chat:
 
 
 class GuardedOpenAI:
-    def __init__(self, client: Any, guardrail: SeedFirstGuardrailProxy) -> None:
-        self.client = client
+    def __init__(
+        self, client: Any, guardrail: SeedFirstGuardrailProxy, *, meter_energy: bool = True
+    ) -> None:
+        self._client = client  # private: callers should not bypass the guard
         self.guardrail = guardrail
+        self.meter_energy = meter_energy
         self.chat = _Chat(self)

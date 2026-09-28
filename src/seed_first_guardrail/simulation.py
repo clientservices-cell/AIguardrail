@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import statistics
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -100,6 +101,9 @@ class SiliconSimulationEngine:
     ) -> None:
         if runs < 1:
             raise ValueError("runs must be at least 1")
+        if twin is not None and not (0 < worst_case_floor <= 1):
+            # A floor of 0 accepts a twin that always reports total collapse (review AR-18).
+            raise ValueError("a digital twin requires 0 < worst_case_floor <= 1")
         self.twin = twin
         self.runs = runs
         self.worst_case_floor = worst_case_floor
@@ -117,15 +121,25 @@ class SiliconSimulationEngine:
             )
 
         if self.twin is None:
+            # Say exactly what happened -- no claim of "resilience" (review AR-14).
             return SimulationReport(
                 passed=True,
-                message="Simulation Passed: Policy exhibits resilience and safety buffers.",
+                message=(
+                    "Structural review found no red flags. No digital twin is configured, "
+                    "so no simulation was performed."
+                ),
             )
 
-        outcomes = await asyncio.gather(
-            *(self.twin(policy_spec, seed) for seed in range(self.runs))
-        )
-        outcomes = [min(max(float(o), 0.0), 1.0) for o in outcomes]
+        raw = await asyncio.gather(*(self.twin(policy_spec, seed) for seed in range(self.runs)))
+        if any(not isinstance(o, (int, float)) or not math.isfinite(o) for o in raw):
+            # NaN compared false against the floor and passed any policy (review AR-05).
+            return SimulationReport(
+                passed=False,
+                message="Simulation Failed: the digital twin returned a non-finite outcome.",
+                findings=["NON_FINITE_OUTCOME"],
+                runs=self.runs,
+            )
+        outcomes = [min(max(float(o), 0.0), 1.0) for o in raw]
         worst, mean = min(outcomes), statistics.fmean(outcomes)
         if worst < self.worst_case_floor:
             return SimulationReport(

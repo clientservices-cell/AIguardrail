@@ -5,10 +5,24 @@ Tier 1 planetary boundaries, Tier 2 community sovereignty, Tier 3 inviolable
 individual floor, plus the silicon-simulation mandate and automated circuit breakers.
 """
 
-from .audit import AuditLogger, AuditRecord, InMemoryAuditSink, JsonlFileAuditSink
-from .circuit_breaker import BreakerState, CircuitBreaker
-from .config import CustomRule, PolicyConfig, load_policy_schema, validate_policy_document
+from .audit import (
+    AuditLogger,
+    AuditRecord,
+    ChainReport,
+    InMemoryAuditSink,
+    JsonlFileAuditSink,
+    verify_chain,
+)
+from .circuit_breaker import Admission, BreakerState, CircuitBreaker
+from .config import (
+    CustomRule,
+    PolicyConfig,
+    RuleScope,
+    load_policy_schema,
+    validate_policy_document,
+)
 from .evaluators import (
+    CapabilitySupportMonitor,
     ComputeBudget,
     Evaluator,
     LLMJudgeEvaluator,
@@ -34,12 +48,15 @@ from .types import (
     Status,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
+    "Admission",
     "AuditLogger",
     "AuditRecord",
     "BreakerState",
+    "CapabilitySupportMonitor",
+    "ChainReport",
     "CircuitBreaker",
     "ComputeBudget",
     "CulturalContext",
@@ -56,6 +73,7 @@ __all__ = [
     "Phase",
     "PolicyConfig",
     "PolicyValidationError",
+    "RuleScope",
     "SeedFirstGuardrailProxy",
     "SeedFirstMiddleware",
     "SeedStockReport",
@@ -72,4 +90,5 @@ __all__ = [
     "load_policy_schema",
     "openai_judge",
     "validate_policy_document",
+    "verify_chain",
 ]

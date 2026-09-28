@@ -13,6 +13,7 @@ from seed_first_guardrail import (
     CustomRule,
     PolicyConfig,
     PolicyValidationError,
+    RuleScope,
     load_policy_schema,
     validate_policy_document,
 )
@@ -84,7 +85,14 @@ def test_unknown_keys_rejected() -> None:
 def test_semantic_errors_reported_as_policy_errors() -> None:
     doc = copy.deepcopy(MINIMAL)
     doc["tier_2_community_sovereignty"]["custom_rules"] = [
-        {"id": "BAD", "pattern": "([unclosed", "reason": "x"}
+        {
+            "id": "BAD",
+            "pattern": "([unclosed",
+            "reason": "x",
+            "scope": "DATA_USE",
+            "legal_basis": "By-law s.1",
+            "adopting_body_ref": "Minute 1",
+        }
     ]
     with pytest.raises(PolicyValidationError, match="invalid regular expression"):
         PolicyConfig.from_policy_document(doc)
@@ -107,7 +115,16 @@ def test_round_trip() -> None:
         max_cumulative_kwh=50,
         max_water_liters=3,
         cultural_context=CulturalContext.INDIGENOUS_CARE,
-        custom_rules=(CustomRule(id="R1", pattern="x", reason="y"),),
+        custom_rules=(
+            CustomRule(
+                id="R1",
+                pattern="xyzzy",
+                reason="y",
+                scope=RuleScope.RESOURCE_ALLOCATION,
+                legal_basis="By-law s.1",
+                adopting_body_ref="Minute 1",
+            ),
+        ),
         min_seed_stock_score=0.4,
     )
     doc = cfg.to_policy_document()
