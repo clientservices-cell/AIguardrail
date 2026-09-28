@@ -17,3 +17,6 @@ coverage.xml
 # Word document build (docs/build)
 docs/build/node_modules/
 docs/build/out/
+
+# Accountability demo output
+demo_output/

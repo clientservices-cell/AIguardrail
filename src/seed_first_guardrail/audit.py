@@ -160,10 +160,12 @@ class AuditLogger:
         *,
         include_text: bool = False,
         key: bytes | str | None = None,
+        clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.sinks: list[AuditSink] = list(sinks) if sinks is not None else [log_sink]
         self.include_text = include_text
         self.key = load_key(key)
+        self.clock = clock or (lambda: datetime.now(timezone.utc))
         self.sink_failures = 0
         self._prev = GENESIS
         self._lock = threading.Lock()
@@ -206,7 +208,7 @@ class AuditLogger:
         results = decision.results
         rec = AuditRecord(
             audit_id=decision.audit_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=self.clock().isoformat(),
             kind=kind,
             status=decision.status.value,
             tier=decision.tier.value if decision.tier else None,
@@ -251,7 +253,7 @@ class AuditLogger:
         """Record metered energy for a decision (KPIs K-07, K-10; agent CA-2)."""
         rec = AuditRecord(
             audit_id=audit_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=self.clock().isoformat(),
             kind="energy",
             status="METERED",
             tier=None,

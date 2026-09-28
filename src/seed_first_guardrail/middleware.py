@@ -46,7 +46,7 @@ from .evaluators.tier1 import ComputeBudget, Tier1PlanetaryEvaluator
 from .evaluators.tier2 import Tier2CommunityEvaluator
 from .evaluators.tier3 import Tier3InviolableEvaluator
 from .metrics import PILLAR_TIER, compute_seed_stock
-from .simulation import SiliconSimulationEngine
+from .simulation import SiliconSimulationEngine, looks_like_policy
 from .types import (
     EvaluationContext,
     EvaluationResult,
@@ -85,7 +85,11 @@ class SeedFirstGuardrailProxy:
         audit_logger: AuditLogger | None = None,
         budget: ComputeBudget | None = None,
         extra_evaluators: Sequence[Evaluator] = (),
+        capability_judge: JudgeFn | None = None,
     ) -> None:
+        """``capability_judge`` runs the non-blocking CAPABILITY_SUPPORT monitor (K-23) when
+        ``capability_monitoring`` is on; it defaults to ``judge``. It may be a cheaper model,
+        and can be used without any blocking judge."""
         self.config = cfg = config or PolicyConfig()
         self.budget = budget or ComputeBudget(cfg.max_cumulative_kwh)
         self.tier1_eval = Tier1PlanetaryEvaluator(
@@ -121,11 +125,12 @@ class SeedFirstGuardrailProxy:
             escalate=self.judge_eval is not None,
             include_text=cfg.audit_include_text,
         )
+        cap_fn = capability_judge or judge_fn
         self.capability_eval = (
             CapabilitySupportMonitor(
-                judge_fn, context=cfg.cultural_context, timeout_s=cfg.judge_timeout_s
+                cap_fn, context=cfg.cultural_context, timeout_s=cfg.judge_timeout_s
             )
-            if cfg.capability_monitoring and judge_fn is not None
+            if cfg.capability_monitoring and cap_fn is not None
             else None
         )
         self.simulation_engine = simulation_engine or SiliconSimulationEngine(
@@ -186,13 +191,24 @@ class SeedFirstGuardrailProxy:
     # -- decisions --------------------------------------------------------------
 
     def _base_metadata(self, ctx: EvaluationContext) -> dict[str, Any]:
-        return {
+        carbon = (
+            ctx.carbon_intensity_g_kwh
+            if ctx.carbon_intensity_g_kwh is not None
+            else self.config.default_carbon_intensity_g_kwh
+        )
+        meta: dict[str, Any] = {
             "jurisdiction_id": self.config.jurisdiction_id,
             "cultural_framework": self.config.cultural_context.value,
             "circuit_breaker": self.circuit_breaker.state.value,
             "channels_screened": list(ctx.metadata.get("channels", ["text"])),
-            "energy": {"estimated_kwh": ctx.estimated_kwh},
+            "energy": {"estimated_kwh": ctx.estimated_kwh, "carbon_intensity_g_kwh": carbon},
+            "community_action": ctx.affects_community or ctx.is_macro_policy_proposal,
+            "consent_asserted": ctx.community_consent is True,
+            "macro_policy": ctx.is_macro_policy_proposal,
         }
+        if ctx.metadata.get("unscreened"):
+            meta["unscreened"] = list(ctx.metadata["unscreened"])
+        return meta
 
     def _flags(self, results: list[EvaluationResult]) -> dict[str, Any]:
         """Collect near-miss, review and judge signals for the KPIs and agents."""
@@ -603,6 +619,7 @@ class SeedFirstGuardrailProxy:
             **self._base_metadata(ctx),
             **self._flags(results),
             "seed_stock": seed.as_dict(),
+            "policy_like": looks_like_policy(completion),
         }
         governance["energy"].update(
             budget_used_kwh=self.budget.used_kwh,

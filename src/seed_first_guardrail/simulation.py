@@ -18,6 +18,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import math
+import re
 import statistics
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -68,6 +69,23 @@ STRUCTURAL_RULES: list[PatternRule] = [
         unless=_MITIGATION,
     ),
 ]
+
+
+_POLICY_LIKE = re.compile(
+    r"\b(?:nation-?wide|country-?wide|national\s+policy|mandate[sd]?|legislation|by-?laws?"
+    r"|regulations?|allocation\s+rules?|abolish\w*|all\s+(?:citizens|households|residents)"
+    r"|tariffs?|quotas?|ration(?:ing)?|subsid(?:y|ies)|levy|curfew|moratorium)\b",
+    re.IGNORECASE,
+)
+
+
+def looks_like_policy(text: str) -> bool:
+    """Heuristic: does ``text`` read like a macro-level policy proposal? (agent CA-8)
+
+    Used to surface completions that probably needed the simulation mandate but were
+    not flagged ``is_macro_policy_proposal`` by the caller (review AR-09).
+    """
+    return len(_POLICY_LIKE.findall(normalize(text))) >= 2
 
 
 @dataclass

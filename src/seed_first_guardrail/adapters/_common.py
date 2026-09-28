@@ -66,6 +66,9 @@ async def guarded_call(
             request.text, sorted(request.unscreenable), metadata=metadata, **who
         )
         raise GuardrailViolation(decision)
+    if request.unscreenable:
+        # Allowed by policy, but recorded so channel coverage (KPI K-19) stays honest.
+        metadata["unscreened"] = sorted(request.unscreenable)
 
     holder: dict[str, Any] = {}
 
