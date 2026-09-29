@@ -4,10 +4,14 @@ Generates styled Word (.docx) versions of the Seed-First documents from their Ma
 
 | Config | Source | Output |
 |---|---|---|
-| `documents/act.json` | `docs/seed_first_ai_act.md` | `Seed-First_AI_Act_Draft_v2.docx` |
-| `documents/framework.json` | `docs/framework.md` | `Seed-First_AI_Governance_Framework_v2.docx` |
+| `documents/act.json` | `docs/seed_first_ai_act.md` | `Seed-First_AI_Act_Draft_v2.1.docx` |
+| `documents/framework.json` | `docs/framework.md` | `Seed-First_AI_Governance_Framework_v2.1.docx` |
 | `documents/dossier.json` | `docs/research_dossier.md` | `Seed-First_Research_Dossier.docx` |
 | `documents/annex.json` | `docs/regulatory_annex.md` | `Seed-First_Regulatory_Annex.docx` |
+| `documents/review.json` | `docs/adversarial_review.md` | `Seed-First_Adversarial_Review.docx` |
+| `documents/kpis.json` | `docs/accountability_kpis.md` | `Seed-First_Accountability_KPIs.docx` |
+| `documents/agents.json` | `docs/compliance_agents.md` | `Seed-First_Compliance_Agents.docx` |
+| `documents/scenarios.json` | `docs/scenario_gaming.md` | `Seed-First_Scenario_Gaming.docx` |
 
 ## Setup (once)
 

@@ -1,0 +1,19 @@
+{
+  "input": "../../compliance_agents.md",
+  "fileName": "Seed-First_Compliance_Agents.docx",
+  "kicker": "EARLY WARNING  ·  13 AGENTS",
+  "title": "Compliance Agents",
+  "subtitle": "Deterministic monitors that warn before an adverse action occurs",
+  "description": "Describes the thirteen advisory agents that forecast breaches of the Seed-First AI Act from the audit trail and event feed.",
+  "dateLine": "28 September 2026  ·  SEED-FIRST-GUARDRAIL 0.2.0",
+  "header": "Compliance Agents  ·  Seed-First AI Guardrail  ·  For discussion",
+  "docTitle": "Seed-First Compliance Agents",
+  "docDescription": "Predictive compliance agents for the Seed-First AI Guardrail",
+  "tableWidths": {
+    "Rule": [
+      1500,
+      4263,
+      3263
+    ]
+  }
+}

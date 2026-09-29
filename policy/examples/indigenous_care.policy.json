@@ -20,7 +20,10 @@
         "id": "SACRED_SITE_LOCATIONS",
         "pattern": "\\b(?:coordinates|location|map)\\s+(?:[\\w'-]+\\s+){0,3}sacred\\s+sites?\\b",
         "unless": "\\bauthori[sz]ed\\s+by\\s+(?:the\\s+)?(?:nation|elders|community)\\b",
-        "reason": "Sacred site locations may be disclosed only with the authority of the nation (CARE: Authority to control)."
+        "reason": "Sacred site locations may be disclosed only with the authority of the nation (CARE: Authority to control).",
+        "scope": "SACRED_OR_TK_DISCLOSURE",
+        "legal_basis": "UNDRIP Arts. 11-12, 31; CARE Principles (Authority to control) (illustrative)",
+        "adopting_body_ref": "Illustrative Indigenous data governance authority, resolution 2026/3 (example only)"
       }
     ]
   },

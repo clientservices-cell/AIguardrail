@@ -3,15 +3,33 @@
 Rules come from three layers: a base pack that applies everywhere, a pack for the
 configured :class:`CulturalContext`, and any ``custom_rules`` the community's own
 policy document supplies.
+
+Community rules are powerful and can be abused (review AR-02). They must declare a
+narrow ``scope``, a legal basis and the adopting body; they are rejected at load
+time if they would block the protected-speech canary (see :mod:`..canary`); and
+they run on the ``regex`` engine with a per-match time limit. Tier 2 blocks never
+count toward the circuit breaker.
+
+🧒 A village can make its own rules, like house rules in a board game -- but it may
+not make a rule that hides the news, stops people asking for help, or bans a
+language. Those rules get thrown out before the game starts.
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable
+from typing import Any
 
-from .._patterns import GAP2, GAP3, PatternRule, first_match, normalize
+from .._context import mitigations
+from .._patterns import GAP2, GAP3, PatternRule, RuleTimeout, normalize
 from ..config import CustomRule
 from ..types import CulturalContext, EvaluationContext, EvaluationResult, FrameworkTier, Phase
+
+#: Per-match time limit for community-supplied rules, in seconds.
+CUSTOM_RULE_TIMEOUT = 0.05
+
+#: A rule hit: the rule, the match object and the mitigating contexts found.
+Hit = tuple[PatternRule, Any, list[str]]
 
 _CONSENT = (
     r"\b(?:consent\w*|consultation|authority\s+to\s+control|benefit[- ]sharing"
@@ -177,11 +195,38 @@ def rules_for(context: CulturalContext, custom: Iterable[CustomRule] = ()) -> li
     rules = BASE_RULES + CONTEXT_RULES[context]
     rules += [
         PatternRule(
-            code=r.id, pattern=r.pattern, reason=r.reason, unless=r.unless, article="community rule"
+            code=r.id,
+            pattern=r.pattern,
+            reason=r.reason,
+            unless=r.unless,
+            article=f"community rule ({r.scope.value})",
+            timeout=CUSTOM_RULE_TIMEOUT,
         )
         for r in custom
     ]
     return rules
+
+
+def screen(rules: list[PatternRule], text: str) -> tuple[list[Hit], list[Hit], list[str]]:
+    """Match ``rules`` against ``text``.
+
+    Returns ``(proposals, mentions, timed_out)``: hits that propose the act, hits
+    that only mention it (negated, condemned, asked about, reported, rights advice),
+    and codes of community rules that exceeded their time limit and were skipped.
+    """
+    norm = normalize(text)
+    proposals: list[Hit] = []
+    mentions: list[Hit] = []
+    timed_out: list[str] = []
+    for rule in rules:
+        try:
+            hits = [(m, mitigations(norm, m.start(), m.end())) for m in rule.finditer(norm)]
+        except RuleTimeout:
+            timed_out.append(rule.code)
+            continue
+        for match, mit in hits:
+            (mentions if mit else proposals).append((rule, match, mit))
+    return proposals, mentions, timed_out
 
 
 class Tier2CommunityEvaluator:
@@ -198,11 +243,13 @@ class Tier2CommunityEvaluator:
         custom_rules: Iterable[CustomRule] = (),
         community_consent_required: bool = False,
         jurisdiction_id: str = "GLOBAL",
+        include_text: bool = False,
     ) -> None:
         self.context = context
         self.rules = rules_for(context, custom_rules)
         self.community_consent_required = community_consent_required
         self.jurisdiction_id = jurisdiction_id
+        self.include_text = include_text
 
     def _fail(self, code: str, reason: str, **metrics: object) -> EvaluationResult:
         return EvaluationResult(
@@ -229,8 +276,19 @@ class Tier2CommunityEvaluator:
                 )
             return EvaluationResult.ok(self.name, context=self.context.value)
 
-        hit = first_match(self.rules, normalize(ctx.completion or ""))
-        if hit is None:
-            return EvaluationResult.ok(self.name, context=self.context.value)
-        rule, matched = hit
-        return self._fail(rule.code, f"{rule.reason} [{rule.article}]", matched=matched)
+        proposals, mentions, timed_out = screen(self.rules, ctx.completion or "")
+        metrics: dict[str, object] = {"context": self.context.value}
+        if timed_out:
+            metrics["rule_timeouts"] = timed_out  # surfaced to CA-5 as a governance alert
+        if mentions:
+            metrics.update(
+                review_flag=True,
+                near_miss=True,
+                lexical_hits=sorted({r.code for r, _, _ in mentions}),
+            )
+        if not proposals:
+            return EvaluationResult.ok(self.name, **metrics)
+        rule, match, _ = proposals[0]
+        if self.include_text:
+            metrics["matched"] = match.group(0)
+        return self._fail(rule.code, f"{rule.reason} [{rule.article}]", **metrics)

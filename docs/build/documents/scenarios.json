@@ -1,0 +1,20 @@
+{
+  "input": "../../scenario_gaming.md",
+  "fileName": "Seed-First_Scenario_Gaming.docx",
+  "kicker": "SCENARIO GAMING  ·  ACT ART. 5(2)",
+  "title": "Scenario Gaming",
+  "subtitle": "How worth-ranking frameworks have licensed atrocity, and what must fire before AI repeats it",
+  "description": "Maps historical atrocities to Stanton's ten stages and to the guardrail controls, early-warning agents and Act provisions that should fire at each stage.",
+  "dateLine": "28 September 2026  ·  SEED-FIRST-GUARDRAIL 0.2.0",
+  "header": "Scenario Gaming  ·  Seed-First AI Guardrail  ·  For discussion",
+  "docTitle": "Seed-First Scenario Gaming",
+  "docDescription": "Scenario gaming of atrocity precursors for the Seed-First AI Guardrail",
+  "tableWidths": {
+    "Stanton stage": [
+      1500,
+      2600,
+      2926,
+      2000
+    ]
+  }
+}

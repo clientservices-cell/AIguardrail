@@ -143,31 +143,44 @@ def test_simulation_requires_runs() -> None:
 
 
 def test_breaker_lifecycle(clock: FakeClock) -> None:
-    cb = CircuitBreaker(threshold=2, window_s=10, cooldown_s=60, clock=clock)
+    cb = CircuitBreaker(threshold=2, window_s=10, cooldown_s=60, min_principals=2, clock=clock)
     assert cb.state is BreakerState.CLOSED
-    cb.record_violation("a")
+    cb.record_violation("a", principal="p1")
     clock.advance(20)  # first violation ages out of the window
-    cb.record_violation("b")
+    cb.record_violation("b", principal="p1")
     assert cb.state is BreakerState.CLOSED
-    cb.record_violation("c")
+    cb.record_violation("c", principal="p2")
     assert cb.state is BreakerState.OPEN and not cb.allow_request()
-    assert cb.last_reason == "c"
+    assert cb.last_reason == "c" and cb.trips == 1
     clock.advance(61)
-    assert cb.state is BreakerState.HALF_OPEN and cb.allow_request()
-    cb.record_violation("d")  # probation violation reopens at once
+    assert cb.state is BreakerState.HALF_OPEN and cb.allow_request("p3")
+    cb.record_violation("d", principal="p1")  # one principal alone cannot reopen it
+    assert cb.state is BreakerState.HALF_OPEN
+    cb.record_violation("e", principal="p2")
     assert cb.state is BreakerState.OPEN
     clock.advance(61)
     cb.record_success()
     assert cb.state is BreakerState.CLOSED
     cb.record_success()  # no-op when closed
-    assert cb.snapshot()["state"] == "CLOSED"
+    snap = cb.snapshot()
+    assert snap["state"] == "CLOSED" and snap["trips"] == 2 and "last_reason" not in snap
+
+
+def test_breaker_principal_suspension_expires(clock: FakeClock) -> None:
+    cb = CircuitBreaker(threshold=2, window_s=60, cooldown_s=60, min_principals=3, clock=clock)
+    cb.record_violation("x", principal="mallory")
+    cb.record_violation("x", principal="mallory")
+    assert cb.admit("mallory").value == "PRINCIPAL_SUSPENDED"
+    assert cb.admit("alice").value == "ALLOW" and cb.state is BreakerState.CLOSED
+    assert cb.snapshot()["suspended_principals"] == 1
+    clock.advance(61)
+    assert cb.admit("mallory").value == "ALLOW"
 
 
 def test_breaker_manual_trip_and_reset(clock: FakeClock) -> None:
     cb = CircuitBreaker(clock=clock)
     cb.trip("ICT suspension order")
-    assert cb.state is BreakerState.OPEN
-    assert cb.snapshot()["last_reason"] == "ICT suspension order"
+    assert cb.state is BreakerState.OPEN and cb.last_reason == "ICT suspension order"
     cb.reset()
     assert cb.state is BreakerState.CLOSED and cb.last_reason == ""
 
@@ -184,15 +197,36 @@ def _decision() -> GuardrailDecision:
     return GuardrailDecision(status=Status.APPROVED, completion="ok")
 
 
-def test_audit_hashes_by_default() -> None:
+def test_audit_keyed_digests_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    from seed_first_guardrail.audit import keyed_digest
+
     sink = InMemoryAuditSink()
-    rec = AuditLogger([sink]).record(
-        _decision(), prompt="secret", completion="ok", jurisdiction_id="J", cultural_context="C"
+    rec = AuditLogger([sink], key="k").record(
+        _decision(),
+        prompt="secret",
+        completion="ok",
+        jurisdiction_id="J",
+        cultural_context="C",
+        metadata={"language": "sw", "unlisted": "dropped"},
     )
     assert sink.records == [rec]
-    assert rec.prompt is None and rec.prompt_sha256 == sha256("secret")
-    assert sha256(None) is None
+    assert rec.prompt is None and rec.prompt_digest == keyed_digest(b"k", "secret")
+    assert rec.prompt_digest != sha256("secret") and sha256(None) is None
+    assert rec.labels == {"language": "sw"}
     assert json.loads(rec.to_json())["status"] == "APPROVED"
+
+    monkeypatch.setenv("SEED_FIRST_AUDIT_KEY", "from-env")
+    assert AuditLogger([]).key == b"from-env"
+    monkeypatch.delenv("SEED_FIRST_AUDIT_KEY")
+    assert len(AuditLogger([]).key) == 32  # random per-process key
+
+
+def test_audit_energy_records() -> None:
+    sink = InMemoryAuditSink()
+    rec = AuditLogger([sink], key=b"k").record_energy(
+        "abc", estimated_kwh=1.0, actual_kwh=0.2, jurisdiction_id="J", cultural_context="C"
+    )
+    assert rec.kind == "energy" and rec.energy == {"estimated_kwh": 1.0, "actual_kwh": 0.2}
 
 
 def test_audit_can_include_text_and_write_jsonl(tmp_path: Path) -> None:

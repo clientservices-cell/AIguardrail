@@ -1,0 +1,12 @@
+{
+  "input": "../../adversarial_review.md",
+  "fileName": "Seed-First_Adversarial_Review.docx",
+  "kicker": "ADVERSARIAL REVIEW  ·  RELEASE 0.2.0",
+  "title": "What Would Go Wrong",
+  "subtitle": "Adversarial review of the Seed-First AI Guardrail, with fixes and status",
+  "description": "Twenty-seven findings from red-teaming the reference implementation, each with its fix, its status in release 0.2.0 and a plain-language explanation.",
+  "dateLine": "28 September 2026  ·  SEED-FIRST-GUARDRAIL 0.2.0",
+  "header": "Adversarial Review  ·  Seed-First AI Guardrail  ·  For discussion",
+  "docTitle": "Seed-First AI Guardrail — Adversarial Review",
+  "docDescription": "Adversarial review of the Seed-First AI Guardrail (release 0.2.0)"
+}

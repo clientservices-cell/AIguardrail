@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
@@ -21,6 +22,7 @@ class FrameworkTier(Enum):
     TIER_3_INVIOLABLE_HUMAN_FLOOR = "TIER_3_INVIOLABLE_HUMAN_FLOOR"
     SILICON_SIMULATION = "SILICON_SIMULATION"
     CIRCUIT_BREAKER = "CIRCUIT_BREAKER"
+    INPUT_LIMITS = "INPUT_LIMITS"
 
 
 class CulturalContext(Enum):
@@ -33,6 +35,8 @@ class CulturalContext(Enum):
 class Status(str, Enum):
     APPROVED = "APPROVED"
     BLOCKED = "BLOCKED"
+    #: The model call itself failed; recorded for audit completeness (KPI K-15).
+    ERROR = "ERROR"
 
 
 class Phase(str, Enum):
@@ -56,6 +60,22 @@ class EvaluationContext:
     affects_community: bool = False
     community_consent: bool | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    #: Who is asking (user, API key, session) -- used for per-principal breaker
+    #: accounting and stored only as a keyed digest (review AR-04, AR-11).
+    principal: str | None = None
+    tenant: str | None = None
+
+    def __post_init__(self) -> None:
+        # A NaN or negative figure silently disabled Tier 1 for every tenant
+        # (review AR-05). Reject them at the boundary.
+        for name in ("estimated_kwh", "carbon_intensity_g_kwh", "water_liters"):
+            value = getattr(self, name)
+            if value is None and name == "carbon_intensity_g_kwh":
+                continue
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                raise ValueError(f"{name} must be a number, got {value!r}")
+            if not math.isfinite(value) or value < 0:
+                raise ValueError(f"{name} must be finite and >= 0, got {value!r}")
 
     @property
     def text(self) -> str:
@@ -96,6 +116,16 @@ class GuardrailDecision:
     def approved(self) -> bool:
         return self.status is Status.APPROVED
 
+    @property
+    def review_flag(self) -> bool:
+        """True when a rule hit was read as a *mention* and a human should look."""
+        return bool(self.governance_metadata.get("review_flag"))
+
+    @property
+    def contest_ref(self) -> str:
+        """Reference a person quotes to contest this decision (Act Art. 9(c), 9(f))."""
+        return f"contest:{self.audit_id}"
+
     def to_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {"status": self.status.value, "audit_id": self.audit_id}
         if self.approved:
@@ -104,6 +134,7 @@ class GuardrailDecision:
             out["tier"] = self.tier.value if self.tier else None
             out["code"] = self.code
             out["reason"] = self.reason
+            out["contest_ref"] = self.contest_ref
         out["governance_metadata"] = self.governance_metadata
         return out
 

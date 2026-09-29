@@ -1,17 +1,25 @@
 {
   "input": "../../seed_first_ai_act.md",
-  "fileName": "Seed-First_AI_Act_Draft_v2.docx",
-  "kicker": "MODEL CONVENTION  ·  DRAFT v2",
+  "fileName": "Seed-First_AI_Act_Draft_v2.1.docx",
+  "kicker": "MODEL CONVENTION  ·  DRAFT v2.1",
   "title": "The Seed-First AI Act",
   "subtitle": "Model Convention and Regulatory Framework on Intergenerational Artificial Intelligence Governance",
   "description": "A joint draft instrument for adaptation as a United Nations model law or treaty, a European Union regulation, and an African Union convention.",
-  "dateLine": "26 September 2026  ·  Revision of the v1 draft",
-  "header": "The Seed-First AI Act  ·  Draft v2  ·  For discussion — not legal advice",
-  "docTitle": "The Seed-First AI Act — Draft v2",
-  "docDescription": "Model convention on intergenerational AI governance (draft v2, for discussion)",
-  "pageBreakBefore": "^(Change Log|Annex A)",
+  "dateLine": "28 September 2026  ·  Revision of the v2 draft",
+  "header": "The Seed-First AI Act  ·  Draft v2.1  ·  For discussion — not legal advice",
+  "docTitle": "The Seed-First AI Act — Draft v2.1",
+  "docDescription": "Model convention on intergenerational AI governance (draft v2.1, for discussion)",
+  "pageBreakBefore": "^(Change Log: v1|Annex A)",
   "tableWidths": {
-    "#": [520, 1480, 3513, 3513],
-    "Article": [3100, 5926]
+    "#": [
+      520,
+      1480,
+      3513,
+      3513
+    ],
+    "Article": [
+      3100,
+      5926
+    ]
   }
 }

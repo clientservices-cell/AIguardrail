@@ -8,6 +8,7 @@ from seed_first_guardrail import (
     EvaluationContext,
     FrameworkTier,
     Phase,
+    RuleScope,
     Tier2CommunityEvaluator,
 )
 
@@ -95,10 +96,23 @@ async def test_custom_rules() -> None:
         pattern=r"pump\w* at night",
         reason="Quiet hours",
         unless=r"emergency",
+        scope=RuleScope.RESOURCE_ALLOCATION,
+        legal_basis="Village by-law 3",
+        adopting_body_ref="Village council minute 7",
     )
-    ev = Tier2CommunityEvaluator(CulturalContext.UBUNTU, custom_rules=[rule])
-    assert (await ev.evaluate(post("Schedule pumping at night."))).code == "NO_NIGHT_PUMPING"
+    ev = Tier2CommunityEvaluator(CulturalContext.UBUNTU, custom_rules=[rule], include_text=True)
+    blocked = await ev.evaluate(post("Schedule pumping at night."))
+    assert blocked.code == "NO_NIGHT_PUMPING" and blocked.metrics["matched"] == "pumping at night"
     assert (await ev.evaluate(post("Pumping at night in an emergency."))).passed
+    # An exception phrase in a *different* sentence no longer switches the rule off (AR-07).
+    assert (
+        await ev.evaluate(post("Schedule pumping at night. There was an emergency last year."))
+    ).code
+    # Rights advice about the rule is a mention, not a violation (AR-03).
+    mention = await ev.evaluate(
+        post("If they schedule pumping at night, you can complain to the council.")
+    )
+    assert mention.passed and mention.metrics["review_flag"] is True
 
 
 async def test_consent_required_for_community_actions() -> None:

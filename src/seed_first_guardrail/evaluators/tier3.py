@@ -1,20 +1,49 @@
 """Tier 3 -- the inviolable individual floor (Seed-First AI Act, Art. 3(3), 4(3), 5, 6(1)).
 
-A lexical, non-optimisable screen. Nothing here can be weighted, scored away or
-disabled by policy; a match is an immediate halt. Lexical rules only catch
-explicit phrasing -- pair this evaluator with :class:`LLMJudgeEvaluator` to
-catch paraphrase.
+A lexical, non-optimisable screen: nothing here can be weighted, scored away or
+disabled by policy. A hit that *proposes* the harm halts the request; a hit that
+only *mentions* it is flagged for review (see :mod:`seed_first_guardrail._context`).
+
+Lexical rules catch explicit English phrasing only. They do not catch paraphrase or
+other languages, and the measured false-positive and evasion characteristics are in
+docs/adversarial_review.md. For deployment, configure :class:`LLMJudgeEvaluator`:
+every lexical hit is then escalated to the judge, which fails closed.
+
+🧒 This is the "never, ever" list: things no AI may do to people, no matter what
+anyone offers in exchange. It is like the rule in Toy Story that toys never hurt
+their kid -- it is not up for a trade.
 """
 
 from __future__ import annotations
 
-from .._patterns import GAP2, GAP3, PatternRule, first_match, normalize
+from .._context import mitigations
+from .._patterns import GAP2, GAP3, PatternRule, all_matches, normalize
 from ..types import EvaluationContext, EvaluationResult, FrameworkTier, Phase
 
 _POPULATION = (
     r"(?:humans|human\s+(?:beings|lives)|people|persons|populations?|children|minors|infants"
     r"|minorit(?:y|ies)|(?:the\s+)?elderly|(?:the\s+)?disabled|refugees|migrants|women|girls"
-    r"|villagers|residents|inhabitants|tribes|communities)\b(?!['’])"
+    # Not followed by a possessive or a hyphenated compound: "people's data" and
+    # "the elderly-care backlog" are not the people themselves (review AR-03).
+    r"|villagers|residents|inhabitants|tribes|communities"
+    # Groups historically targeted by justified atrocity (addendum: slave trade, witch
+    # hunts, Holocaust and other genocides). Naming them here protects them; it does not
+    # restrict speech about them -- only *proposals* of harm are blocked.
+    r"|jews|muslims|christians|hindus|sikhs|roma|sinti|tutsis?|armenians|uyghurs|rohingya"
+    r"|yazidis|herero|nama|indigenous\s+peoples?|aboriginal\s+people|black\s+people|africans"
+    r"|immigrants|witches|heretics|infidels|unbelievers|gay\s+people|lgbtq\+?\s+people"
+    r"|trans\s+people|dissidents|the\s+poor)\b(?![-'’]\w?)"
+)
+_HARM_VERB = (
+    r"(?:sacrific\w*|harvest\w*|eliminat\w*|exterminat\w*|eradicat\w*|cull\w*|annihilat\w*"
+    r"|enslav\w*|massacr\w*|slaughter\w*|lynch\w*|burn\w*|purg\w*|gas|gassing"
+    r"|wip(?:e|ed|es|ing)\s+out|get(?:ting)?\s+rid\s+of|dispos\w*\s+of|let\s+(?:them\s+)?die)"
+)
+_AUTHORITY = (
+    r"(?:god'?s\s+will|the\s+will\s+of\s+god|divinely\s+ordained|ordained\s+by\s+(?:god|heaven)"
+    r"|scripture|the\s+natural\s+order|(?:our|their|national|manifest)\s+destiny"
+    r"|racial\s+(?:science|hygiene|purity)|survival\s+of\s+the\s+fittest|the\s+market\s+demands"
+    r"|economic\s+necessity|the\s+planet\s+demands|ecological\s+necessity|the\s+seed\s+stock\s+demands)"
 )
 _CHILD = r"(?:child(?:ren)?|minors?|kids|infants?|babies|newborns)"
 
@@ -24,10 +53,39 @@ TIER3_RULES: list[PatternRule] = [
         code="POPULATION_HARM",
         article="Art. 3(3)",
         reason="Proposes sacrificing, eliminating or culling people to achieve a system goal.",
+        pattern=r"\b" + _HARM_VERB + r"\s+" + GAP2 + _POPULATION,
+    ),
+    # -- Ranking human worth / justification laundering (addendum) ------------------
+    PatternRule(
+        code="HUMAN_WORTH_RANKING",
+        article="Art. 3(3)(e); Art. 5(2)",
+        reason="Dehumanises a group of people (a documented precursor of atrocity).",
         pattern=(
-            r"\b(?:sacrific\w*|harvest\w*|eliminat\w*|exterminat\w*|eradicat\w*|cull\w*"
-            r"|wip(?:e|ed|es|ing)\s+out|get(?:ting)?\s+rid\s+of|dispos\w*\s+of"
-            r"|let\s+(?:them\s+)?die)\s+" + GAP2 + _POPULATION
+            r"\b(?:they|them|those\s+people|these\s+people|such\s+people|(?:the\s+)?[\w-]+s)\s+"
+            r"(?:are|were)\s+(?:nothing\s+but\s+|just\s+|mere\s+|no\s+better\s+than\s+)?"
+            r"(?:vermin|subhuman|sub-human|cockroaches|rats|parasites|lice|savages"
+            r"|a\s+(?:disease|plague|cancer|virus|infestation)|inferior\s+(?:beings|races?|people|stock))\b"
+        ),
+    ),
+    PatternRule(
+        code="HUMAN_WORTH_RANKING",
+        article="Art. 3(3)(e); Art. 5(2)",
+        reason="Ranks some human lives as worth less than others.",
+        pattern=(
+            r"\b(?:some|certain|these|those|their)\s+(?:people|lives|races?|groups?|castes?|kinds\s+of\s+people)\s+"
+            r"(?:are|is)\s+(?:simply\s+|naturally\s+)?(?:worth\s+less|less\s+(?:human|valuable|worthy)"
+            r"|inferior|expendable|disposable|unworthy\s+of\s+life)\b"
+        ),
+    ),
+    PatternRule(
+        code="HUMAN_WORTH_RANKING",
+        article="Art. 3(3); Art. 5(2)",
+        reason="Invokes a higher authority to justify harming people (justification laundering).",
+        pattern=(
+            r"\b"
+            + _AUTHORITY
+            + r"\b[^.;]{0,80}?\b(?:justif\w*|requires?|demands?|permits?|commands?"
+            r"|allows?)\b[^.;]{0,40}?\b" + _HARM_VERB + r"\b"
         ),
     ),
     PatternRule(
@@ -180,10 +238,10 @@ TIER3_RULES: list[PatternRule] = [
             r"|\b(?:child(?:ren)?|minors?|kids|underage|pre-?teens?)\b[^.]{0,40}\b"
             r"(?:sexual\w*|erotic|nude|naked)\b"
         ),
-        unless=(
-            r"\b(?:education|educator|health|safeguard\w*|abuse\s+prevention|protect\w*|report\w*"
-            r"|consent\s+education|pediatric\w*|paediatric\w*)\b"
-        ),
+        # No lexical exception: a document-wide "magic word" used to switch this rule
+        # off (review AR-07). Education and safeguarding context is judged per sentence
+        # by _context.mitigations() instead, and Tier 3 hits go to the judge when one
+        # is configured.
     ),
     # -- Short-termist extraction of the seed stock (Art. 6(1)) --------------
     PatternRule(
@@ -227,10 +285,25 @@ TIER3_RULES: list[PatternRule] = [
 
 
 class Tier3InviolableEvaluator:
-    """Screens the prompt (PRE) and the completion (POST) against :data:`TIER3_RULES`.
+    """Screens the completion (POST), and optionally the prompt (PRE), against
+    :data:`TIER3_RULES`, reading each hit in the context of its own sentence.
 
-    ``screen_prompts=False`` skips the PRE screen so that users may *ask about*
-    atrocities (history, ethics, journalism); the completion is always screened.
+    For every rule hit, :func:`~seed_first_guardrail._context.mitigations` decides
+    whether the sentence *proposes* the harm or only *mentions* it (negation,
+    condemnation, question, legal/historical report, safeguarding).
+
+    * **Proposal, no judge** -> block (a *confirmed* Tier 3 violation).
+    * **Mention only, no judge** -> pass with ``review_flag`` (a near-miss for the
+      KPIs and compliance agents).
+    * **Any hit, judge configured** (``escalate=True``) -> pass with
+      ``needs_judge``; the middleware's judge decides and fails closed.
+
+    ``screen_prompts`` defaults to False so people may *ask about* harms (history,
+    ethics, journalism, safeguarding); completions are always screened.
+
+    🧒 The guard reads the whole sentence before shouting. "We should get rid of the
+    villagers" gets stopped; "The court said getting rid of villagers was a crime"
+    gets a sticky note for a grown-up to check, not a red card.
     """
 
     name = "tier3_inviolable"
@@ -238,10 +311,17 @@ class Tier3InviolableEvaluator:
     phases = frozenset({Phase.PRE, Phase.POST})
 
     def __init__(
-        self, extra_rules: list[PatternRule] | None = None, *, screen_prompts: bool = True
+        self,
+        extra_rules: list[PatternRule] | None = None,
+        *,
+        screen_prompts: bool = False,
+        escalate: bool = False,
+        include_text: bool = False,
     ) -> None:
         self.rules = TIER3_RULES + list(extra_rules or [])
         self.screen_prompts = screen_prompts
+        self.escalate = escalate
+        self.include_text = include_text
 
     async def evaluate(self, ctx: EvaluationContext) -> EvaluationResult:
         if ctx.phase is Phase.PRE:
@@ -251,15 +331,35 @@ class Tier3InviolableEvaluator:
         else:
             text, screened = ctx.completion or "", "completion"
 
-        hit = first_match(self.rules, normalize(text))
-        if hit is None:
+        norm = normalize(text)
+        hits = []
+        for rule, match in all_matches(self.rules, norm):
+            hits.append((rule, match, mitigations(norm, match.start(), match.end())))
+        if not hits:
             return EvaluationResult.ok(self.name, screened=screened)
-        rule, matched = hit
+
+        codes = sorted({rule.code for rule, _, _ in hits})
+        proposals = [(rule, m) for rule, m, mit in hits if not mit]
+        metrics: dict[str, object] = {
+            "screened": screened,
+            "lexical_hits": codes,
+            "mitigations": sorted({x for _, _, mit in hits for x in mit}),
+            "near_miss": True,
+        }
+        if self.escalate:
+            return EvaluationResult.ok(self.name, needs_judge=True, **metrics)
+        if not proposals:
+            return EvaluationResult.ok(self.name, review_flag=True, **metrics)
+
+        rule, match = proposals[0]
+        metrics.update(article=rule.article, confirmed=True, match_length=len(match.group(0)))
+        if self.include_text:
+            metrics["matched"] = match.group(0)
         return EvaluationResult(
             passed=False,
             failing_tier=self.tier,
             code=rule.code,
             evaluator=self.name,
             reason=f"Violation of Tier 3 Inviolable Floor ({rule.article}): {rule.reason}",
-            metrics={"screened": screened, "matched": matched, "article": rule.article},
+            metrics=metrics,
         )

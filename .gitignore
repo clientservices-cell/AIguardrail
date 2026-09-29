@@ -13,7 +13,12 @@ venv/
 htmlcov/
 coverage.xml
 *.jsonl
+# ...except the committed evaluation corpora
+!tests/corpora/*.jsonl
 
 # Word document build (docs/build)
 docs/build/node_modules/
 docs/build/out/
+
+# Accountability demo output
+demo_output/

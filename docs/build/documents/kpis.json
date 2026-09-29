@@ -1,0 +1,24 @@
+{
+  "input": "../../accountability_kpis.md",
+  "fileName": "Seed-First_Accountability_KPIs.docx",
+  "kicker": "PUBLIC DASHBOARD  ·  29 INDICATORS",
+  "title": "Accountability KPIs",
+  "subtitle": "Paired public indicators and named model scorecards for AI systems",
+  "description": "Defines the 29 indicators behind the public dashboard, how they are computed, suppressed and paired, and how each named model is graded.",
+  "dateLine": "28 September 2026  ·  SEED-FIRST-GUARDRAIL 0.2.0",
+  "header": "Accountability KPIs  ·  Seed-First AI Guardrail  ·  For discussion",
+  "docTitle": "Seed-First Accountability KPIs",
+  "docDescription": "Public accountability indicators for the Seed-First AI Guardrail",
+  "tableWidths": {
+    "Concept": [
+      1700,
+      4163,
+      3163
+    ],
+    "Group": [
+      1700,
+      4163,
+      3163
+    ]
+  }
+}
