@@ -1,0 +1,670 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seed-First Public Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@87,600;87,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --ground: #f3f6f1;
+  --panel: #fcfdfb;
+  --ink: #1b2420;
+  --ink-2: #45534c;
+  --muted: #6c7a73;
+  --rule: #d8ded8;
+  --track: #e3e8e3;
+  --accent: #2a6a61;
+  --accent-ink: #ffffff;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --critical: #d03b3b;
+  --info: #7b8a83;
+  --good-ink: #0a7d0a;
+  --warning-ink: #9a6500;
+  --critical-ink: #b42f2f;
+  --good-bg: #e2f3df;
+  --warning-bg: #fdf0cf;
+  --critical-bg: #f9dede;
+  --info-bg: #e9edea;
+  --z-good: #bfe5b9;
+  --z-warning: #fbe0a0;
+  --z-critical: #f2b8b5;
+  --demo: #fff4d6;
+  --demo-ink: #5c4300;
+  --hatch: #c9d1ca;
+  --display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --kid: "Atkinson Hyperlegible", Verdana, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0f1411; --panel: #161d19; --ink: #e5ebe6; --ink-2: #b4c0b9; --muted: #8e9c95;
+    --rule: #2a332e; --track: #26302a; --accent: #7cc2b4; --accent-ink: #0d1411;
+    --good-ink: #5fd35f; --warning-ink: #fcc443; --critical-ink: #f07a7a;
+    --good-bg: #173222; --warning-bg: #3a2f12; --critical-bg: #3d1c1c; --info-bg: #222a26;
+    --z-good: #1f5a2a; --z-warning: #6b5316; --z-critical: #6e2727;
+    --demo: #3a2f12; --demo-ink: #f4d58d; --hatch: #33403a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0f1411; --panel: #161d19; --ink: #e5ebe6; --ink-2: #b4c0b9; --muted: #8e9c95;
+  --rule: #2a332e; --track: #26302a; --accent: #7cc2b4; --accent-ink: #0d1411;
+  --good-ink: #5fd35f; --warning-ink: #fcc443; --critical-ink: #f07a7a;
+  --good-bg: #173222; --warning-bg: #3a2f12; --critical-bg: #3d1c1c; --info-bg: #222a26;
+  --z-good: #1f5a2a; --z-warning: #6b5316; --z-critical: #6e2727;
+  --demo: #3a2f12; --demo-ink: #f4d58d; --hatch: #33403a;
+}
+* { box-sizing: border-box; }
+body { background: var(--ground); color: var(--ink); font: 15px/1.55 var(--body); margin: 0; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); font-stretch: 87%; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 1.35rem; font-weight: 800; }
+h3 { font-size: 1rem; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font: 600 0.72rem/1.2 var(--body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.pane { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 18px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.pane-head { display: grid; gap: 4px; }
+.pane-head p { color: var(--ink-2); font-size: 0.9rem; }
+.kidtext { font-family: var(--kid); }
+
+/* status vocabulary: tone classes set --tone, --tone-ink, --tone-bg */
+.t-good { --tone: var(--good); --tone-ink: var(--good-ink); --tone-bg: var(--good-bg); }
+.t-warning { --tone: var(--warning); --tone-ink: var(--warning-ink); --tone-bg: var(--warning-bg); }
+.t-critical { --tone: var(--critical); --tone-ink: var(--critical-ink); --tone-bg: var(--critical-bg); }
+.t-info, .t-withheld { --tone: var(--info); --tone-ink: var(--muted); --tone-bg: var(--info-bg); }
+
+/* masthead */
+.mast { display: grid; gap: 14px; }
+.mast-top { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; justify-content: space-between; }
+.lede { max-width: 68ch; color: var(--ink-2); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: 0.85rem; }
+.meta b { color: var(--ink-2); font-weight: 600; }
+.demo { background: var(--demo); color: var(--demo-ink); border-radius: 8px; padding: 10px 14px; font-weight: 500; display: flex; gap: 10px; align-items: start; }
+.demo svg { flex: none; margin-top: 3px; }
+.voice { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 3px; background: var(--panel); }
+.voice button { font: 600 0.85rem var(--body); border: 0; background: transparent; color: var(--ink-2); padding: 7px 14px; border-radius: 999px; cursor: pointer; }
+.voice button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+button:focus-visible, summary:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* report-card mosaic */
+.summary-bar { display: flex; height: 18px; border-radius: 9px; overflow: hidden; gap: 2px; background: var(--panel); }
+.summary-bar span { display: block; background: var(--tone); min-width: 4px; }
+.summary-bar .t-withheld { background: repeating-linear-gradient(135deg, var(--track) 0 5px, var(--hatch) 5px 7px); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; background: var(--tone); display: inline-block; }
+.legend .t-withheld i { background: repeating-linear-gradient(135deg, var(--track) 0 3px, var(--hatch) 3px 5px); }
+.mosaic { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
+.mgroup { display: grid; gap: 6px; align-content: start; }
+.mgroup h3 { font-size: 0.8rem; font-family: var(--body); font-weight: 600; color: var(--ink-2); letter-spacing: 0.02em; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
+.tile { all: unset; box-sizing: border-box; cursor: pointer; background: var(--tone-bg); border-radius: 8px; padding: 7px 8px; display: grid; gap: 2px; border-top: 4px solid var(--tone); min-height: 66px; }
+.tile.t-withheld { border-top-style: dashed; }
+.tile:hover { filter: brightness(0.97); }
+.tile-top { display: flex; justify-content: space-between; align-items: center; color: var(--tone-ink); }
+.tile-id { font: 500 0.72rem var(--mono); color: var(--ink-2); }
+.tile-val { font: 500 0.95rem var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.tile svg.ico { width: 14px; height: 14px; }
+.tile .face { width: 22px; height: 22px; }
+
+/* twin panel */
+.twin { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.twin-head { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+.ring { width: 104px; height: 104px; flex: none; }
+.ring text { font-family: var(--display); font-stretch: 87%; }
+
+/* KPI rows */
+.kpis { display: grid; }
+.kpi { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 6px 18px; padding: 12px 12px 12px 14px; border-left: 4px solid var(--tone); background: linear-gradient(90deg, var(--tone-bg), transparent 60%); border-radius: 0 8px 8px 0; margin-top: 10px; scroll-margin-top: 24px; }
+.kpi:first-child { margin-top: 0; }
+.kpi.t-withheld { border-left-style: dashed; }
+.kpi-name { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.kpi-id { font: 500 0.75rem var(--mono); color: var(--muted); }
+.kpi-value { display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+.kpi-value .num { font-size: 1.3rem; }
+.kpi-value .unit { color: var(--muted); font-size: 0.8rem; }
+.kpi-explain { grid-column: 1 / -1; color: var(--ink-2); font-size: 0.88rem; }
+.kpi-explain .formula { font-family: var(--mono); font-size: 0.76rem; color: var(--muted); }
+.kpi-foot { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font-size: 0.8rem; color: var(--muted); }
+.chip-link { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; background: none; border: 0; font: inherit; padding: 0; }
+.note { color: var(--ink-2); }
+.status { display: inline-flex; align-items: center; gap: 5px; font: 600 0.72rem/1 var(--body); letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 9px 5px 6px; border-radius: 999px; background: var(--tone); color: #fff; white-space: nowrap; }
+.t-warning .status, .status.t-warning { color: #3a2a00; }
+.status.t-info, .status.t-withheld, .t-info .status, .t-withheld .status { background: var(--info-bg); color: var(--muted); border: 1px solid var(--rule); }
+.status svg { width: 13px; height: 13px; }
+
+/* bullet gauge */
+.gauge { grid-column: 1 / -1; display: grid; gap: 2px; }
+.gauge svg { width: 100%; height: 30px; display: block; overflow: visible; }
+.gauge-scale { display: flex; justify-content: space-between; font: 500 0.7rem var(--mono); color: var(--muted); }
+.withheld { grid-column: 1 / -1; height: 14px; border-radius: 4px; border: 1px dashed var(--hatch);
+  background: repeating-linear-gradient(135deg, transparent 0 5px, var(--hatch) 5px 6px); }
+
+details.breakdown { grid-column: 1 / -1; }
+details.breakdown summary { cursor: pointer; color: var(--accent); font-size: 0.8rem; }
+.bd { display: grid; grid-template-columns: max-content 1fr max-content; gap: 5px 10px; align-items: center; margin-top: 8px; font-size: 0.8rem; }
+.bd-bar { height: 10px; background: var(--track); border-radius: 0 5px 5px 0; position: relative; }
+.bd-bar i { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 0 5px 5px 0; }
+
+/* forecast timeline */
+.timeline { display: grid; gap: 0; }
+.tl-row { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: 12px; align-items: center; padding-block: 7px; border-top: 1px solid var(--rule); }
+.tl-row:first-child { border-top: 0; }
+.tl-label { display: grid; gap: 1px; font-size: 0.82rem; line-height: 1.3; }
+.tl-label .agent { font: 500 0.72rem var(--mono); color: var(--tone-ink); }
+.tl-track { position: relative; height: 26px; }
+.tl-track .base { position: absolute; left: 0; right: 0; top: 12px; height: 2px; background: var(--track); }
+.tl-track .span { position: absolute; top: 9px; height: 8px; border-radius: 4px; background: var(--tone); opacity: 0.35; }
+.tl-track .span.overdue { opacity: 1; background: repeating-linear-gradient(135deg, var(--tone) 0 4px, transparent 4px 7px); }
+.tl-track .dot { position: absolute; top: 5px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--tone); border: 2px solid var(--panel); }
+.tl-track .when { position: absolute; top: -13px; font: 500 0.7rem var(--mono); color: var(--ink-2); white-space: nowrap; transform: translateX(-50%); }
+.tl-now { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.tl-axis { position: relative; height: 18px; font: 500 0.7rem var(--mono); color: var(--muted); }
+.tl-axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.tl-axis .now { color: var(--ink); font-weight: 600; }
+
+.alerts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 12px; }
+.alert { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; display: grid; align-content: start; }
+.alert-head { background: var(--tone); color: #fff; padding: 8px 12px; display: flex; gap: 8px; align-items: center; font: 600 0.78rem var(--body); letter-spacing: 0.04em; }
+.alert.t-warning .alert-head { color: #3a2a00; }
+.alert.t-info .alert-head { background: var(--info-bg); color: var(--ink-2); }
+.alert-head svg { width: 16px; height: 16px; flex: none; }
+.alert-head .agent { font-family: var(--mono); margin-left: auto; opacity: 0.9; }
+.alert-body { padding: 12px 14px 14px; display: grid; gap: 6px; }
+.alert p { font-size: 0.88rem; color: var(--ink-2); }
+.alert .action { font-size: 0.82rem; color: var(--ink); }
+.forecast { font-size: 0.8rem; color: var(--ink); }
+
+/* fair trade pictographs */
+.fair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.picto { display: grid; gap: 8px; align-content: start; }
+.picto-icons { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 320px; }
+.picto-icons svg { width: 100%; height: auto; display: block; }
+.picto-caption { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.picto-caption .num { font-size: 1.5rem; color: var(--tone-ink); }
+.picto p { font-size: 0.86rem; color: var(--ink-2); }
+
+/* model ratings */
+.models { display: grid; gap: 12px; }
+.model { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; align-items: center; padding: 14px; border-radius: 10px; background: linear-gradient(90deg, var(--tone-bg), var(--panel) 70%); border: 1px solid var(--rule); }
+.grade { width: 64px; height: 64px; border-radius: 16px; background: var(--tone); color: #fff; display: grid; place-items: center; font: 800 2.2rem/1 var(--display); font-stretch: 87%; grid-row: span 2; }
+.t-warning .grade { color: #3a2a00; }
+.grade.none { background: var(--info-bg); color: var(--muted); font-size: 1rem; border: 1px dashed var(--hatch); }
+.model-name { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+.model-name h3 { font: 600 1.05rem var(--mono); }
+.model-name .score { font: 500 0.85rem var(--mono); color: var(--ink-2); }
+.stars { color: var(--tone); letter-spacing: 2px; font-size: 1.2rem; }
+.groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.grp { display: grid; gap: 3px; font-size: 0.78rem; color: var(--ink-2); }
+.grp-bar { height: 10px; border-radius: 5px; background: var(--track); overflow: hidden; }
+.grp-bar i { display: block; height: 100%; background: var(--tone); border-radius: 5px; }
+.model-foot { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 0.8rem; color: var(--ink-2); }
+.dots { display: flex; flex-wrap: wrap; gap: 4px; }
+.dots span { width: 14px; height: 14px; border-radius: 4px; background: var(--tone); }
+.dots span.t-withheld { background: repeating-linear-gradient(135deg, var(--track) 0 3px, var(--hatch) 3px 5px); }
+.cap { color: var(--critical-ink); font-weight: 600; }
+.model-note { font-size: 0.82rem; color: var(--muted); }
+@media (max-width: 560px) { .groups { grid-template-columns: 1fr; } .grade { width: 52px; height: 52px; font-size: 1.8rem; } }
+
+.pillars { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr)); gap: 16px; }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.section-head p { color: var(--ink-2); max-width: 70ch; }
+footer { color: var(--muted); font-size: 0.82rem; display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 16px; }
+
+.face { width: 30px; height: 30px; flex: none; color: var(--tone-ink); }
+body.kid .grown { display: none; }
+body:not(.kid) .kidonly { display: none; }
+body.kid .kpi-explain, body.kid .alert p.plain, body.kid .picto p { font-family: var(--kid); font-size: 1rem; line-height: 1.5; color: var(--ink); }
+body.kid .kpi-name h3 { font-family: var(--kid); font-size: 1.02rem; font-weight: 700; }
+body.kid .tile .face { width: 26px; height: 26px; }
+
+.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--ground); font: 500 0.78rem/1.35 var(--body); padding: 6px 9px; border-radius: 6px; z-index: 10; max-width: 280px; }
+
+@media (max-width: 760px) {
+  .twin { grid-template-columns: 1fr; }
+  .kpi { grid-template-columns: 1fr; }
+  .kpi-value { justify-content: flex-start; }
+  .tl-row { grid-template-columns: 1fr; gap: 14px; }
+  .ring { width: 84px; height: 84px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .voice button, .tile { transition: background 120ms ease, color 120ms ease, filter 120ms ease; }
+}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="mast-top">
+      <div>
+        <p class="eyebrow">Seed-First AI Act &middot; public accountability ledger</p>
+        <h1>Seed-First Public Ledger</h1>
+      </div>
+      <div class="voice" role="group" aria-label="Choose how the page explains things">
+        <button type="button" id="voice-grown" aria-pressed="true">Grown-up view</button>
+        <button type="button" id="voice-kid" aria-pressed="false">Kid view</button>
+      </div>
+    </div>
+    <p class="lede grown">How well are the AI systems under this policy stopping harm, and are they keeping human effort, diversity and fair value flowing? Each figure has a paired counter-figure, so no system can look good by refusing everything or by doing everything for people.</p>
+    <p class="lede kidonly kidtext" style="font-size: 1.05rem;">This is a report card for AI helpers. It checks two things: did the AI stop hurtful stuff, and did it still let people think and try for themselves? A muscle you never use gets weak.</p>
+    <div class="demo" id="demo-banner" hidden>
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 15 14H1L8 1.5Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 6v4M8 11.6v.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span><b>Demonstration data.</b> Synthetic traffic from a simulated month, run through the real guardrail. The tenants, regions, value flows and red-team figures are invented.</span>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <section class="pane" aria-labelledby="card-h">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">All 29 indicators at a glance</p>
+        <h2 id="card-h">Report card</h2>
+      </div>
+      <p class="grown">Each square is one indicator, coloured by status. Tap one to jump to it.</p>
+      <p class="kidonly kidtext">Every square is one score. Green is great, yellow means be careful, red means fix it now.</p>
+    </div>
+    <div class="summary-bar" id="summary-bar" role="img"></div>
+    <div class="legend" id="legend"></div>
+    <div class="mosaic" id="mosaic"></div>
+  </section>
+
+  <section class="twin" aria-label="Harm stopped and struggle kept">
+    <div class="pane">
+      <div class="twin-head">
+        <svg class="ring" id="ring-harm" viewBox="0 0 100 100"></svg>
+        <div class="pane-head">
+          <p class="eyebrow">First question</p>
+          <h2>Harm stopped</h2>
+          <p class="grown">Tier 3 violations, harms that escaped, and near-misses as the leading sign.</p>
+          <p class="kidonly kidtext">Did the guard stop the really mean stuff?</p>
+        </div>
+      </div>
+      <div class="kpis" data-ids="K-01,K-02,K-03"></div>
+    </div>
+    <div class="pane">
+      <div class="twin-head">
+        <svg class="ring" id="ring-struggle" viewBox="0 0 100 100"></svg>
+        <div class="pane-head">
+          <p class="eyebrow">Second question</p>
+          <h2>Struggle kept</h2>
+          <p class="grown">Moderate struggle, don't eliminate it: people still choose, learners still work, and challenge isn't bubble-wrapped.</p>
+          <p class="kidonly kidtext">Did people still get to think, try and choose for themselves?</p>
+        </div>
+      </div>
+      <div class="kpis" data-ids="K-21,K-22,K-23,K-24"></div>
+    </div>
+  </section>
+
+  <section class="pane" aria-labelledby="models-h" id="models-section">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Named and rated</p>
+        <h2 id="models-h">Model ratings</h2>
+      </div>
+      <p class="grown">Each AI model, named by the ID that served the calls, graded A–F from its own measured indicators. Harm stopped, struggle kept and fairness count equally; confirmed harm or over-refusal caps the grade at C.</p>
+      <p class="kidonly kidtext">Every AI helper gets its name on the board and a grade. You only get an A if you stop the mean stuff <i>and</i> still let people think.</p>
+    </div>
+    <div class="models" id="models"></div>
+    <p class="grown model-note" id="models-note"></p>
+  </section>
+
+  <section class="pane" aria-labelledby="alerts-h">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Compliance agents</p>
+        <h2 id="alerts-h">Early warnings</h2>
+      </div>
+      <p class="grown">Advisory only: agents forecast a breach before it happens and recommend action. People decide.</p>
+      <p class="kidonly kidtext">The lookouts shout <i>before</i> trouble arrives. A grown-up decides what to do.</p>
+    </div>
+    <div>
+      <h3 style="margin-bottom:6px">Countdown to forecast breaches</h3>
+      <p class="grown" style="color:var(--ink-2); font-size:0.88rem; margin-bottom:18px">The upright line marks when the warning was raised. Each bar runs to the date the agent expects the breach; a striped bar is already overdue.</p>
+      <p class="kidonly kidtext" style="margin-bottom:18px">The upright line is "now". The dot is when trouble is expected. Striped means it's already late!</p>
+      <div class="timeline" id="timeline"></div>
+    </div>
+    <div class="alerts" id="alerts"></div>
+  </section>
+
+  <section class="pane" aria-labelledby="fair-h">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Value-flow equity</p>
+        <h2 id="fair-h">Is the trade fair?</h2>
+      </div>
+      <p class="grown">For the worst-served region: how much value comes back for every unit taken, how much compute runs locally, and how service compares.</p>
+      <p class="kidonly kidtext">If a village gave ten treasures, how many came back?</p>
+    </div>
+    <div class="fair" id="fair"></div>
+  </section>
+
+  <section aria-label="All indicators" class="pillars" id="pillars"></section>
+
+  <footer>
+    <p id="disclaimer"></p>
+    <p class="grown">Groups smaller than the threshold are withheld, publication is delayed, and community-level figures appear only with the community's consent. Rule patterns, guardrail thresholds and record digests are never published.</p>
+    <p class="kidonly kidtext">We never show one person's name, and we wait before posting so nobody can guess who's who.</p>
+  </footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script type="application/json" id="snapshot">/*__SNAPSHOT__*/null</script>
+<script>
+(function () {
+  "use strict";
+  var PILLAR_TEXT = {
+    "Harm prevention": ["", ""],
+    "Fair refusals": ["Is the guard saying no only when it should?", "Does the guard say 'no' only when it really should?"],
+    "Planetary": ["Energy, carbon and the budget the AI must live within.", "How much electricity and smoke does the AI use?"],
+    "Community": ["Consent, published rules, and honouring 'stop'.", "Does the AI ask the village first, and stop when told?"],
+    "Integrity": ["Is the record complete, untampered and reported on time?", "Is the diary complete, with no torn-out pages?"],
+    "Robustness": ["How often do testers get past, and are all channels watched?", "Can the practice bad guys sneak past the guard?"],
+    "Diversity": ["Equal treatment across languages; answers that don't collapse into one.", "Is the guard fair to every kid, whatever language they speak?"],
+    "Value-flow equity": ["Is value taken from a region being returned to it?", "If a village gave treasure, did it get a fair share back?"]
+  };
+  var FIRST = ["K-01", "K-02", "K-03", "K-21", "K-22", "K-23", "K-24"];
+  var TONE = { green: "good", amber: "warning", red: "critical", info: "info", insufficient_data: "withheld" };
+  var LABEL = { good: "Good", warning: "Watch", critical: "Act now", info: "Tracked", withheld: "Not enough data" };
+  var ICON = {
+    good: '<path d="M3 7.5 6 10.5 11 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+    warning: '<path d="M7 3v5M7 10.4v.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+    critical: '<path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+    info: '<circle cx="7" cy="7" r="2.2" fill="currentColor"/>',
+    withheld: '<path d="M3 7h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+  };
+  var MOUTH = { good: "M10 19c3 3 9 3 12 0", warning: "M10 20h12", critical: "M10 21c3-3 9-3 12 0" };
+  var ORDER = ["good", "warning", "critical", "info", "withheld"];
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return "&#" + c.charCodeAt(0) + ";"; }); }
+  function prose(s) { return esc(s).replace(/ -- /g, " — ").replace(/\*([^*]+)\*/g, "<em>$1</em>"); }
+  function tone(k) { return TONE[k.status] || "info"; }
+  function load() {
+    var embedded = JSON.parse(document.getElementById("snapshot").textContent);
+    return fetch("snapshot.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : embedded; })
+      .catch(function () { return embedded; });
+  }
+  function fmt(k, v) {
+    if (v == null) return "—";
+    switch (k.unit) {
+      case "share": return (v * 100).toFixed(v < 0.1 && v > 0 ? 1 : 0) + "%";
+      case "per 10k": return v.toFixed(v < 10 ? 1 : 0);
+      case "hours": return v.toFixed(0);
+      case "ratio": return "×" + v.toFixed(2);
+      case "kWh per 1k": case "gCO2e": return v.toFixed(2);
+      default: return String(Math.round(v * 100) / 100);
+    }
+  }
+  var UNIT_LABELS = { "share": "", "per 10k": "per 10,000", "hours": "hours (median)", "ratio": "", "kWh per 1k": "kWh per 1,000", "gCO2e": "g CO₂e each", "trips": "trips" };
+  function unitLabel(k) { return k.unit in UNIT_LABELS ? UNIT_LABELS[k.unit] : k.unit; }
+  function icon(t) { return '<svg class="ico" viewBox="0 0 14 14" aria-hidden="true">' + ICON[t] + '</svg>'; }
+  function chip(t) { return '<span class="status t-' + t + '">' + icon(t) + LABEL[t] + '</span>'; }
+  function face(t, cls) {
+    if (!MOUTH[t]) return "";
+    return '<svg class="face ' + (cls || "") + '" viewBox="0 0 32 32" role="img" aria-label="' + LABEL[t] + '"><circle cx="16" cy="16" r="14" fill="var(--tone-bg)" stroke="currentColor" stroke-width="2"/><circle cx="11.5" cy="13" r="1.8" fill="currentColor"/><circle cx="20.5" cy="13" r="1.8" fill="currentColor"/><path d="' + MOUTH[t] + '" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+  }
+  function targetText(k) {
+    var t = k.target || {};
+    if (k.direction === "band" && t.green) return "healthy band " + fmt(k, t.green[0]) + "–" + fmt(k, t.green[1]);
+    if (t.green == null) return "";
+    return (k.direction === "lower" ? "target ≤ " : "target ≥ ") + fmt(k, t.green);
+  }
+
+  /* Bullet gauge: red / amber / green zones from the KPI's own thresholds, CI whisker, value marker. */
+  function domain(k) {
+    var t = k.target, v = k.value, g = t.green, a = t.amber;
+    if (k.direction === "band") return [0, 1];
+    if (k.unit === "share") {
+      if (k.direction === "higher") { var m = Math.min(v, a); return [Math.max(0, m - Math.max(0.03, (1 - m) * 1.5)), 1]; }
+      return [0, Math.min(1, Math.max(v, a, 0.01) * 1.6)];
+    }
+    return [0, Math.max(v, k.direction === "higher" ? g : a) * 1.3];
+  }
+  function zones(k, lo, hi) {
+    var t = k.target, g = t.green, a = t.amber;
+    if (k.direction === "band") return [[lo, a[0], "critical"], [a[0], g[0], "warning"], [g[0], g[1], "good"], [g[1], a[1], "warning"], [a[1], hi, "critical"]];
+    if (k.direction === "higher") return [[lo, a, "critical"], [a, g, "warning"], [g, hi, "good"]];
+    return [[lo, g, "good"], [g, a, "warning"], [a, hi, "critical"]];
+  }
+  function gauge(k) {
+    if (k.value == null) return '<div class="withheld" role="img" aria-label="Withheld: too few cases to publish safely"></div>';
+    if (k.direction === "info" || !k.target || k.target.green == null) return "";
+    var d = domain(k), lo = d[0], hi = d[1], W = 1000;
+    var x = function (v) { return (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * W; };
+    var parts = zones(k, lo, hi).map(function (z) {
+      var x0 = x(z[0]), x1 = x(z[1]);
+      return x1 > x0 ? '<rect x="' + x0 + '" y="6" width="' + (x1 - x0) + '" height="18" fill="var(--z-' + z[2] + ')"/>' : "";
+    });
+    if (k.ci) {
+      var c0 = x(k.ci[0]), c1 = x(k.ci[1]);
+      parts.push('<line x1="' + c0 + '" x2="' + c1 + '" y1="15" y2="15" stroke="var(--ink)" stroke-width="2" vector-effect="non-scaling-stroke"/>');
+      parts.push('<line x1="' + c0 + '" x2="' + c0 + '" y1="10" y2="20" stroke="var(--ink)" stroke-width="2" vector-effect="non-scaling-stroke"/>');
+      parts.push('<line x1="' + c1 + '" x2="' + c1 + '" y1="10" y2="20" stroke="var(--ink)" stroke-width="2" vector-effect="non-scaling-stroke"/>');
+    }
+    parts.push('<rect x="' + (x(k.value) - 5) + '" y="1" width="10" height="28" rx="3" fill="var(--ink)" stroke="var(--panel)" stroke-width="2" vector-effect="non-scaling-stroke"/>');
+    var tip = k.name + ": " + fmt(k, k.value) + (k.ci ? " (95% CI " + fmt(k, k.ci[0]) + "–" + fmt(k, k.ci[1]) + ")" : "") + (targetText(k) ? "; " + targetText(k) : "");
+    return '<div class="gauge" data-tip="' + esc(tip) + '"><svg viewBox="0 0 ' + W + ' 30" preserveAspectRatio="none" role="img" aria-label="' + esc(tip) + '">' + parts.join("") + '</svg>' +
+      '<div class="gauge-scale" aria-hidden="true"><span>' + fmt(k, lo) + '</span><span>' + fmt(k, hi) + '</span></div></div>';
+  }
+  function breakdown(k) {
+    var cells = Object.keys(k.breakdown || {});
+    if (!cells.length) return "";
+    var max = 0;
+    cells.forEach(function (c) { var v = k.breakdown[c].value; if (v != null && v > max) max = v; });
+    var rows = cells.map(function (c) {
+      var cell = k.breakdown[c], label = c.replace(":", ": ");
+      if (cell.suppressed || cell.value == null) return '<span>' + esc(label) + '</span><span class="bd-bar" aria-hidden="true"></span><span>withheld</span>';
+      var w = max ? (cell.value / max) * 100 : 0;
+      return '<span>' + esc(label) + '</span><span class="bd-bar" aria-hidden="true"><i style="width:' + w.toFixed(1) + '%"></i></span><span class="num">' + fmt(k, cell.value) + '</span>';
+    }).join("");
+    return '<details class="breakdown"><summary>Breakdown (' + cells.length + ')</summary><div class="bd">' + rows + '</div></details>';
+  }
+  function kpiRow(k) {
+    var t = tone(k);
+    return '<article class="kpi t-' + t + '" id="' + k.id + '">' +
+      '<div class="kpi-name"><span class="kpi-id">' + k.id + '</span><h3>' + esc(k.name) + '</h3></div>' +
+      '<div class="kpi-value">' + face(t, "kidonly") + '<span class="num">' + fmt(k, k.value) + '</span><span class="unit">' + esc(unitLabel(k)) + '</span>' + chip(t) + '</div>' +
+      gauge(k) +
+      '<p class="kpi-explain"><span class="kidonly">' + prose(k.plain_language) + '</span><span class="grown formula">' + esc(k.formula) + '</span></p>' +
+      '<div class="kpi-foot"><span class="grown">' + esc(targetText(k)) + '</span>' +
+      '<span>Paired with <button type="button" class="chip-link" data-jump="' + k.paired_with + '">' + k.paired_with + '</button></span>' +
+      (k.n_band && k.n_band !== "suppressed" ? '<span class="grown">n ' + esc(k.n_band) + '</span>' : "") +
+      (k.note ? '<span class="note">' + esc(k.note) + '</span>' : "") + '</div>' +
+      breakdown(k) + '</article>';
+  }
+
+  function summary(kpis) {
+    var counts = {};
+    kpis.forEach(function (k) { var t = tone(k); counts[t] = (counts[t] || 0) + 1; });
+    var total = kpis.length, aria = [];
+    var bar = ORDER.filter(function (t) { return counts[t]; }).map(function (t) {
+      aria.push(counts[t] + " " + LABEL[t].toLowerCase());
+      return '<span class="t-' + t + '" style="flex:' + counts[t] + '" data-tip="' + counts[t] + ' of ' + total + ': ' + LABEL[t] + '"></span>';
+    }).join("");
+    var el = document.getElementById("summary-bar");
+    el.innerHTML = bar; el.setAttribute("aria-label", aria.join(", "));
+    document.getElementById("legend").innerHTML = ORDER.filter(function (t) { return counts[t]; }).map(function (t) {
+      return '<span class="t-' + t + '"><i></i><b class="num">' + counts[t] + '</b> ' + LABEL[t] + '</span>';
+    }).join("");
+  }
+  function mosaic(kpis) {
+    var pillars = [];
+    kpis.forEach(function (k) { if (pillars.indexOf(k.pillar) < 0) pillars.push(k.pillar); });
+    document.getElementById("mosaic").innerHTML = pillars.map(function (p) {
+      var tiles = kpis.filter(function (k) { return k.pillar === p; }).map(function (k) {
+        var t = tone(k);
+        return '<button type="button" class="tile t-' + t + '" data-jump="' + k.id + '" data-tip="' + esc(k.id + " " + k.name + " — " + LABEL[t]) + '" aria-label="' + esc(k.id + " " + k.name + ": " + LABEL[t]) + '">' +
+          '<span class="tile-top"><span class="tile-id">' + k.id + '</span><span class="grown">' + icon(t) + '</span>' + face(t, "kidonly") + '</span>' +
+          '<span class="tile-val">' + fmt(k, k.value) + '</span></button>';
+      }).join("");
+      return '<div class="mgroup"><h3>' + esc(p) + '</h3><div class="tiles">' + tiles + '</div></div>';
+    }).join("");
+  }
+  function ring(id, ks) {
+    var el = document.getElementById(id), n = ks.length, R = 40, C = 2 * Math.PI * R, gap = 3;
+    var good = ks.filter(function (k) { return tone(k) === "good"; }).length;
+    var segs = ks.map(function (k, i) {
+      var len = C / n - gap, off = -(C / n) * i;
+      var col = { good: "var(--good)", warning: "var(--warning)", critical: "var(--critical)" }[tone(k)] || "var(--hatch)";
+      return '<circle cx="50" cy="50" r="' + R + '" fill="none" stroke="' + col + '" stroke-width="13" stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + off + '" transform="rotate(-90 50 50)"><title>' + esc(k.id + " " + k.name + ": " + LABEL[tone(k)]) + '</title></circle>';
+    }).join("");
+    el.setAttribute("role", "img");
+    el.setAttribute("aria-label", good + " of " + n + " indicators good");
+    el.innerHTML = segs + '<text x="50" y="52" text-anchor="middle" font-size="24" font-weight="800" fill="var(--ink)">' + good + '/' + n + '</text><text x="50" y="68" text-anchor="middle" font-size="10" fill="var(--muted)">good</text>';
+  }
+
+  function sevTone(a) { return { critical: "critical", warning: "warning" }[a.severity] || "info"; }
+  var DAY = 864e5;
+  function timeline(alerts) {
+    var dated = alerts.filter(function (a) { return a.predicted_breach_at; });
+    var el = document.getElementById("timeline");
+    if (!dated.length) { el.innerHTML = '<p class="note">No dated forecasts in this period.</p>'; return; }
+    var now = Date.parse(dated[0].raised_at);
+    dated.sort(function (a, b) { return Date.parse(a.predicted_breach_at) - Date.parse(b.predicted_breach_at); });
+    /* Square-root "days from now" scale (labelled on the axis): near-term warnings stay
+       readable even when one forecast sits months out. */
+    var sq = function (t) { var d = (t - now) / DAY; return d < 0 ? -Math.sqrt(-d) : Math.sqrt(d); };
+    var ds = dated.map(function (a) { return (Date.parse(a.predicted_breach_at) - now) / DAY; });
+    var loD = Math.min(0, Math.min.apply(null, ds)) - 2, hiD = Math.max(7, Math.max.apply(null, ds)) + 4;
+    var lo = sq(now + loD * DAY), hi = sq(now + hiD * DAY);
+    var pct = function (t) { return ((sq(t) - lo) / (hi - lo) * 100).toFixed(2) + "%"; };
+    var day = function (t) { return new Date(t).toISOString().slice(5, 10); };
+    var rows = dated.map(function (a) {
+      var t = Date.parse(a.predicted_breach_at), tn = sevTone(a), overdue = t < now;
+      var left = Math.min(t, now), right = Math.max(t, now);
+      var days = Math.round((t - now) / DAY);
+      var rel = overdue ? Math.abs(days) + " days overdue" : days === 0 ? "within a day" : "in " + days + " days";
+      return '<div class="tl-row t-' + tn + '"><div class="tl-label"><span class="agent">' + esc(a.agent) + ' · ' + day(t) + ' · ' + esc(rel) + '</span><span>' + esc(a.title) + '</span></div>' +
+        '<div class="tl-track" data-tip="' + esc(a.agent + ": " + a.title + " — forecast " + a.predicted_breach_at.slice(0, 10)) + '"><div class="base"></div>' +
+        '<div class="span' + (overdue ? " overdue" : "") + '" style="left:' + pct(left) + ';width:calc(' + pct(right) + ' - ' + pct(left) + ')"></div>' +
+        '<div class="tl-now" style="left:' + pct(now) + '"></div>' +
+        '<div class="dot" style="left:' + pct(t) + '"></div></div></div>';
+    }).join("");
+    var TICKS = [[-28, "−4 wk"], [-7, "−1 wk"], [7, "+1 wk"], [30, "+1 mo"], [90, "+3 mo"], [180, "+6 mo"]];
+    var ticks = TICKS.filter(function (tk) { return tk[0] > loD && tk[0] < hiD; }).map(function (tk) {
+      return '<span style="left:' + pct(now + tk[0] * DAY) + '">' + tk[1] + '</span>';
+    });
+    el.innerHTML = rows + '<div class="tl-row" style="border-top:1px solid var(--rule)"><span class="grown" style="font-size:0.75rem;color:var(--muted)">Time from now (square-root scale)</span><span class="kidonly"></span><div class="tl-axis">' + ticks.join("") + '<span class="now" style="left:' + pct(now) + '">now</span></div></div>';
+  }
+  function alertCard(a) {
+    var t = sevTone(a), sev = { critical: "Act now", warning: "Warning", info: "Note" }[a.severity] || a.severity;
+    var forecast = a.predicted_breach_at ? '<p class="forecast">Forecast breach: <span class="num">' + esc(a.predicted_breach_at.slice(0, 10)) + '</span>' + (a.confidence != null ? ' · confidence <span class="num">' + Math.round(a.confidence * 100) + '%</span>' : "") + '</p>' : "";
+    return '<article class="alert t-' + t + '">' +
+      '<div class="alert-head">' + icon(t) + '<span>' + esc(sev) + '</span><span class="agent">' + esc(a.agent) + '</span></div>' +
+      '<div class="alert-body"><h3>' + esc(a.title) + '</h3>' +
+      '<p class="grown">' + prose(a.public_summary) + '</p><p class="kidonly plain">' + prose(a.plain_language) + '</p>' +
+      forecast + '<p class="action grown"><b>Recommended:</b> ' + esc(a.recommended_action) + '</p></div></article>';
+  }
+
+  var GLYPH = {
+    coin: '<circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="var(--panel)" stroke-width="1.6"/>',
+    server: '<rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="13" width="16" height="7" rx="1.5"/>',
+    person: '<circle cx="12" cy="6.5" r="4"/><path d="M4 22c0-5 3.6-8.5 8-8.5s8 3.5 8 8.5z"/>'
+  };
+  function picto(k, glyph, kidline, grownline) {
+    if (!k) return "";
+    var t = tone(k), v = k.value == null ? 0 : Math.max(0, Math.min(1, k.value));
+    var filled = Math.round(v * 10), icons = "";
+    for (var i = 0; i < 10; i++) icons += '<svg viewBox="0 0 24 24" aria-hidden="true" fill="' + (i < filled ? "var(--tone)" : "var(--track)") + '">' + GLYPH[glyph] + '</svg>';
+    return '<div class="picto t-' + t + '"><div class="picto-caption"><span class="kpi-id">' + k.id + '</span><h3>' + esc(k.name) + '</h3></div>' +
+      '<div class="picto-icons" role="img" aria-label="' + filled + ' of 10 filled">' + icons + '</div>' +
+      '<div class="picto-caption"><span class="num">' + fmt(k, k.value) + '</span>' + chip(t) + '</div>' +
+      '<p class="grown">' + esc(grownline) + '</p><p class="kidonly">' + esc(kidline) + '</p></div>';
+  }
+
+  var GRADE_TONE = { A: "good", B: "good", C: "warning", D: "critical", F: "critical" };
+  var GRADE_STARS = { A: 5, B: 4, C: 3, D: 2, F: 1 };
+  function scoreTone(s) { return s == null ? "withheld" : s >= 0.9 ? "good" : s >= 0.6 ? "warning" : "critical"; }
+  function modelCard(m, method) {
+    var t = m.grade ? GRADE_TONE[m.grade] : "withheld";
+    var names = (method && method.group_names) || { harm: "Harm stopped", struggle: "Struggle kept", fairness: "Fair to all" };
+    var groups = ["harm", "struggle", "fairness"].map(function (g) {
+      var s = m.groups[g], gt = scoreTone(s);
+      return '<div class="grp t-' + gt + '"><span>' + esc(names[g]) + ' <b class="num">' + (s == null ? "—" : Math.round(s * 100) + "%") + '</b></span>' +
+        '<span class="grp-bar" role="img" aria-label="' + esc(names[g]) + ': ' + (s == null ? "no data" : Math.round(s * 100) + "%") + '"><i style="width:' + (s == null ? 0 : s * 100) + '%"></i></span></div>';
+    }).join("");
+    var dots = Object.keys(m.kpis).map(function (id) {
+      var st = TONE[m.kpis[id].status] || "info";
+      return '<span class="t-' + st + '" data-tip="' + esc(id + ": " + LABEL[st]) + '" aria-label="' + esc(id + ": " + LABEL[st]) + '" role="img"></span>';
+    }).join("");
+    var stars = m.grade ? '<span class="stars kidonly" aria-label="' + GRADE_STARS[m.grade] + ' of 5 stars">' + "★★★★★".slice(0, GRADE_STARS[m.grade]) + '<span style="color:var(--track)">' + "★★★★★".slice(GRADE_STARS[m.grade]) + '</span></span>' : "";
+    return '<article class="model t-' + t + '">' +
+      '<div class="grade' + (m.grade ? "" : " none") + '" aria-label="Grade ' + (m.grade || "not rated") + '">' + (m.grade || "n/a") + '</div>' +
+      '<div class="model-name"><h3>' + esc(m.model) + '</h3>' + stars +
+      (m.score != null ? '<span class="score grown">score ' + Math.round(m.score * 100) + '/100</span>' : "") +
+      '<span class="score grown">n ' + esc(m.n_band) + '</span></div>' +
+      '<div class="groups">' + groups + '</div>' +
+      '<div class="model-foot"><span class="kidonly kidtext">' + prose(m.plain_language) + '</span>' +
+      (m.caps && m.caps.length ? '<span class="cap">Capped at C: ' + esc(m.caps.join("; ")) + '</span>' : "") +
+      '<span class="grown">Indicators</span><span class="dots grown">' + dots + '</span></div></article>';
+  }
+
+  function render(snap) {
+    var byId = {};
+    snap.kpis.forEach(function (k) { byId[k.id] = k; });
+    document.getElementById("demo-banner").hidden = !snap.demonstration;
+    var p = snap.period || {};
+    document.getElementById("meta").innerHTML =
+      '<span>Period <b class="num">' + esc((p.start || "").slice(0, 10)) + ' → ' + esc((p.end || "").slice(0, 10)) + '</b></span>' +
+      '<span>Published after a <b>' + esc(snap.delay_days) + '-day</b> delay</span>' +
+      '<span>Groups under <b class="num">' + esc(snap.k_threshold) + '</b> withheld</span>' +
+      '<span>Community figures: <b>' + (snap.community_breakdowns ? "shown with consent" : "not published") + '</b></span>';
+    document.getElementById("disclaimer").textContent = snap.disclaimer + " Generated by " + snap.generator + ".";
+    summary(snap.kpis);
+    mosaic(snap.kpis);
+    ring("ring-harm", ["K-01", "K-02", "K-03"].map(function (id) { return byId[id]; }).filter(Boolean));
+    ring("ring-struggle", ["K-21", "K-22", "K-23", "K-24"].map(function (id) { return byId[id]; }).filter(Boolean));
+    document.querySelectorAll(".kpis[data-ids]").forEach(function (el) {
+      el.innerHTML = el.getAttribute("data-ids").split(",").map(function (id) { return byId[id] ? kpiRow(byId[id]) : ""; }).join("");
+    });
+    var models = snap.models || [];
+    document.getElementById("models-section").hidden = !models.length;
+    document.getElementById("models").innerHTML = models.map(function (m) { return modelCard(m, snap.rating_method); }).join("");
+    document.getElementById("models-note").textContent =
+      (snap.demonstration ? "Demonstration: these model names are placeholders. Ratings of real, named models come only from real measured traffic. " : "") +
+      "A grade describes a model as deployed under this policy (its prompts, users and tasks), not a universal verdict on the model.";
+    var order = { critical: 0, warning: 1, info: 2 };
+    var alerts = (snap.alerts || []).slice().sort(function (a, b) { return (order[a.severity] - order[b.severity]) || a.agent.localeCompare(b.agent, undefined, { numeric: true }); });
+    timeline(alerts);
+    document.getElementById("alerts").innerHTML = alerts.length ? alerts.map(alertCard).join("") : '<p class="note">No early warnings in this period.</p>';
+    document.getElementById("fair").innerHTML =
+      picto(byId["K-27"], "coin", "For every 10 treasures a village gave, this many came back.", "Value returned per unit extracted. Each coin is a tenth of the value taken; 10 filled coins is a fair trade.") +
+      picto(byId["K-28"], "server", "Out of 10 computers doing the village's work, this many are in the village.", "Share of compute, storage and serving located in the region it serves.") +
+      picto(byId["K-29"], "person", "If the best-served kids get 10 helpings, the least-served get this many.", "Service quality for the least-served group relative to the best-served.");
+    var pillars = [];
+    snap.kpis.forEach(function (k) { if (FIRST.indexOf(k.id) < 0 && pillars.indexOf(k.pillar) < 0) pillars.push(k.pillar); });
+    document.getElementById("pillars").innerHTML = pillars.map(function (name) {
+      var t = PILLAR_TEXT[name] || ["", ""];
+      var rows = snap.kpis.filter(function (k) { return k.pillar === name && FIRST.indexOf(k.id) < 0; }).map(kpiRow).join("");
+      return '<div class="pane"><div class="pane-head"><h2>' + esc(name) + '</h2><p class="grown">' + esc(t[0]) + '</p><p class="kidonly kidtext">' + esc(t[1]) + '</p></div><div class="kpis">' + rows + '</div></div>';
+    }).join("");
+  }
+  function setVoice(kid) {
+    document.body.classList.toggle("kid", kid);
+    document.getElementById("voice-kid").setAttribute("aria-pressed", String(kid));
+    document.getElementById("voice-grown").setAttribute("aria-pressed", String(!kid));
+    try { localStorage.setItem("ledger-voice", kid ? "kid" : "grown"); } catch (e) { /* storage unavailable */ }
+  }
+  document.getElementById("voice-kid").addEventListener("click", function () { setVoice(true); });
+  document.getElementById("voice-grown").addEventListener("click", function () { setVoice(false); });
+  try { if (localStorage.getItem("ledger-voice") === "kid" || location.hash === "#kid") setVoice(true); } catch (e) { if (location.hash === "#kid") setVoice(true); }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("[data-jump]") : null;
+    if (!b) return;
+    var el = document.getElementById(b.getAttribute("data-jump"));
+    if (el) { el.scrollIntoView({ block: "center" }); var h = el.querySelector("h3"); h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
+  });
+  var tip = document.getElementById("tip");
+  document.addEventListener("pointermove", function (e) {
+    var t = e.target.closest ? e.target.closest("[data-tip]") : null;
+    if (!t) { tip.hidden = true; return; }
+    tip.textContent = t.getAttribute("data-tip"); tip.hidden = false;
+    var x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+    tip.style.left = x + "px"; tip.style.top = (e.clientY + 16) + "px";
+  });
+  load().then(function (snap) { if (snap) render(snap); });
+})();
+</script>

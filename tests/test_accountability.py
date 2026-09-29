@@ -651,3 +651,90 @@ def test_committed_dashboard_snapshot_is_valid() -> None:
     snap = json.loads(path.read_text(encoding="utf-8"))
     assert snap["demonstration"] is True
     assert not list(Draft202012Validator(load_snapshot_schema()).iter_errors(snap))
+
+
+def test_dashboard_render_embeds_snapshot_safely(tmp_path: Path) -> None:
+    from seed_first_guardrail.dashboard import render
+
+    snap = json.loads((ROOT / "docs/dashboard/demo_snapshot.json").read_text(encoding="utf-8"))
+    snap["disclaimer"] = "</script><script>alert(1)</script>"
+    page = render(snap)
+    assert page.lstrip().startswith("<meta")
+    assert page.count("</script>") == 2  # only the page's own two script blocks
+    assert "Kid view" in page and "Struggle kept" in page and "Harm stopped" in page
+    start = page.index('id="snapshot">') + len('id="snapshot">')
+    embedded = json.loads(page[start : page.index("</script>", start)])
+    assert embedded["disclaimer"] == snap["disclaimer"]
+
+    out = tmp_path / "index.html"
+    assert (
+        cli(
+            [
+                "dashboard",
+                "--snapshot",
+                str(ROOT / "docs/dashboard/demo_snapshot.json"),
+                "--out",
+                str(out),
+            ]
+        )
+        == 0
+    )
+    assert out.read_text(encoding="utf-8") == (ROOT / "docs/dashboard/index.html").read_text(
+        encoding="utf-8"
+    ), "docs/dashboard/index.html is stale: re-run the dashboard command"
+
+
+def _decision(model: str, i: int, **kw: Any) -> dict[str, Any]:
+    rec = {
+        "kind": "decision",
+        "audit_id": f"{model}-{i}",
+        "timestamp": "2026-09-01T00:00:00+00:00",
+        "status": "APPROVED",
+        "labels": {"model": model, "language": "en"},
+        "channels_screened": ["text"],
+    }
+    rec.update(kw)
+    return rec
+
+
+def test_model_scorecards_grade_caps_and_minimums() -> None:
+    from seed_first_guardrail.accountability.scorecards import grade_for, model_scorecards
+
+    assert [grade_for(s) for s in (0.95, 0.8, 0.65, 0.5, 0.1)] == list("ABCDF")
+    records = [_decision("good-model", i) for i in range(200)]
+    records += [_decision("harmful-model", i) for i in range(200)]
+    for i in range(0, 200, 20):  # 100 per 10k confirmed violations -> red K-01
+        records[200 + i].update(status="BLOCKED", confirmed_tier3=True)
+    records += [_decision("tiny-model", i) for i in range(5)]
+    events = [
+        {
+            "type": "redteam_result",
+            "timestamp": "2026-09-02T00:00:00+00:00",
+            "attempts": 100,
+            "evasions": 1,
+            "model": "good-model",
+        },
+    ]
+    events += [  # people still review and change 10% of good-model's answers (K-21 band)
+        {"type": "human_override", "timestamp": "2026-09-02T00:00:00+00:00",
+         "audit_id": f"good-model-{i}"}
+        for i in range(0, 200, 10)
+    ]  # fmt: skip
+    cards = {c["model"]: c for c in model_scorecards(records, events, k=20)}
+    assert cards["good-model"]["kpis"]["K-21"]["status"] == "green"
+    assert cards["harmful-model"]["kpis"]["K-21"]["status"] == "red"  # nobody ever overrides
+    assert cards["good-model"]["grade"] in ("A", "B")
+    assert cards["good-model"]["kpis"]["K-18"]["status"] == "green"  # model-tagged event
+    assert cards["harmful-model"]["kpis"]["K-18"]["status"] == "insufficient_data"
+    assert cards["harmful-model"]["grade"] >= "C"
+    assert "confirmed serious harm" in cards["harmful-model"]["caps"]
+    assert cards["tiny-model"]["grade"] is None and cards["tiny-model"]["score"] is None
+    assert list(cards)[-1] == "tiny-model"  # unrated models sort last
+
+
+def test_committed_snapshot_names_and_rates_models() -> None:
+    snap = json.loads((ROOT / "docs/dashboard/demo_snapshot.json").read_text(encoding="utf-8"))
+    names = [m["model"] for m in snap["models"]]
+    assert names and all(n.startswith("demo-model-") for n in names)  # placeholders only
+    assert [m["grade"] for m in snap["models"]] == sorted(m["grade"] for m in snap["models"])
+    assert snap["rating_method"]["groups"]["harm"][0] == "K-01"

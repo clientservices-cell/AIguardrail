@@ -6,6 +6,7 @@
     seed-first-guardrail kpi-export --audit AUDIT.jsonl [--events EVENTS.jsonl] [--policy FILE] --out SNAPSHOT.json
     seed-first-guardrail monitor --audit AUDIT.jsonl [--events EVENTS.jsonl] [--out ALERTS.jsonl]
     seed-first-guardrail policy-diff OLD.json NEW.json
+    seed-first-guardrail dashboard --snapshot SNAPSHOT.json --out index.html
 
 🧒 The buttons you can press from the keyboard: check a rulebook, test a sentence, make
 the public scoreboard, wake up the lookouts, or compare an old rulebook with a new one.
@@ -27,6 +28,7 @@ from .accountability.events import load_jsonl, parse_time
 from .accountability.snapshot import build_snapshot
 from .audit import KEY_ENV, AuditLogger
 from .config import PolicyConfig, load_policy_file, load_policy_schema, validate_policy_document
+from .dashboard import render as render_dashboard
 from .middleware import SeedFirstGuardrailProxy
 from .types import PolicyValidationError
 
@@ -124,6 +126,15 @@ def _policy_diff(args: argparse.Namespace) -> int:
     return EXIT_BLOCKED if any(a.severity == "critical" for a in alerts) else EXIT_OK
 
 
+def _dashboard(args: argparse.Namespace) -> int:
+    with open(args.snapshot, encoding="utf-8") as fh:
+        snapshot = json.load(fh)
+    with open(args.out, "w", encoding="utf-8") as fh:
+        fh.write(render_dashboard(snapshot))
+    print(f"wrote {args.out}")
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="seed-first-guardrail",
@@ -166,6 +177,10 @@ def build_parser() -> argparse.ArgumentParser:
     d = sub.add_parser("policy-diff", help="Review a policy change before deployment (agent CA-5).")
     d.add_argument("old")
     d.add_argument("new")
+
+    h = sub.add_parser("dashboard", help="Render the public dashboard HTML from a snapshot.")
+    h.add_argument("--snapshot", required=True, help="Snapshot JSON from kpi-export.")
+    h.add_argument("--out", required=True, help="Output HTML file.")
     return parser
 
 
@@ -177,6 +192,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "kpi-export": lambda: _kpi_export(args),
         "monitor": lambda: _monitor(args),
         "policy-diff": lambda: _policy_diff(args),
+        "dashboard": lambda: _dashboard(args),
     }
     if args.command in commands:
         return commands[args.command]()

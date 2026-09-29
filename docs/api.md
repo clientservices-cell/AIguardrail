@@ -94,19 +94,30 @@ All adapters raise `GuardrailViolation` (with a `.decision` attribute) when a re
 
 `guardrail_options` is passed through to `inspect_and_execute`, e.g. `{"estimated_kwh": 0.002, "affects_community": True}`.
 
+The OpenAI and Anthropic adapters record the served model (`response.model`, else the requested `model`) as the audit label `model`, which names the model on public scorecards. Pass `guardrail_options={"metadata": {"model": ...}}` to override it (for example behind a router). LangChain and LlamaIndex callers should pass it this way.
+
 ## Components
 
 - `SiliconSimulationEngine(twin=None, *, runs=32, worst_case_floor=0.0, rules=None)`
   - `await simulate(text) -> SimulationReport`
   - `await run_policy_simulation(text) -> (passed, message)` (baseline-compatible)
-- `CircuitBreaker(threshold=5, window_s=300, cooldown_s=600, *, clock=time.monotonic)`
-  - `allow_request()`, `record_violation()`, `record_success()`, `trip(reason)`, `reset()`, `snapshot()`, `state`
+- `CircuitBreaker(threshold=5, window_s=300, cooldown_s=600, *, min_principals=3, principal_threshold=None, clock=time.monotonic)`
+  - `admit(principal) -> Admission`, `allow_request(principal=None)`, `record_violation(reason, principal=None)`, `record_success()`, `trip(reason)`, `reset()`, `snapshot()`, `state`, `trips`
+  - Only confirmed Tier 3 output violations are recorded; one principal suspends only themselves; a global trip needs `min_principals` distinct principals.
 - `ComputeBudget(limit_kwh)`
   - `try_consume`, `consume`, `would_exceed`, `used_kwh`, `remaining_kwh`, `reset`
 - `compute_seed_stock(text, *utilisations) -> SeedStockReport`
   - `SeedStockReport` provides `aggregate`, `weakest`, `weighted()` and `as_dict()`
-- `AuditLogger(sinks=None, *, include_text=False)`
+- `AuditLogger(sinks=None, *, include_text=False, key=None, clock=None)`: HMAC-keyed digests (`SEED_FIRST_AUDIT_KEY`), hash-chained records; `verify_chain(records, key)`
   - Sinks: `InMemoryAuditSink`, `JsonlFileAuditSink(path)`, or any callable taking an `AuditRecord`
+
+## Accountability (`seed_first_guardrail.accountability`)
+
+- `compute_kpis(records, events=(), *, start=None, end=None, policy=None, audit_key=None, k=20) -> dict[str, KPIResult]`: all 29 KPIs (`KPI_DEFINITIONS`, `KPI_BY_ID`). See `docs/accountability_kpis.md`.
+- `model_scorecards(records, events=(), *, k=20) -> list[dict]`: one scorecard per `model` label, graded A–F, best first; `rating_method()` returns the published method.
+- `build_snapshot(records, events=(), *, now=None, delay_days=7, k=20, policy=None, audit_key=None, publication_consent=None, demonstration=False, monitor=None) -> dict`: the public snapshot, validated by `load_snapshot_schema()`.
+- `ComplianceMonitor(agents).run(records, events, now=None) -> list[Alert]`, `default_agents(audit_key)`, `ComplianceSink`: the 13 agents in `docs/compliance_agents.md`.
+- `seed_first_guardrail.dashboard.render(snapshot) -> str`: the self-contained dashboard HTML.
 
 ## CLI
 
@@ -115,3 +126,7 @@ All adapters raise `GuardrailViolation` (with a `.decision` attribute) when a re
 | `seed-first-guardrail validate-policy FILE...` | Validates policy files | 0 valid, 1 invalid |
 | `seed-first-guardrail check [--policy FILE] --prompt TEXT [--completion TEXT] [--macro-policy]` | Screens a prompt/completion pair | 0 approved, 1 bad policy, 2 blocked |
 | `seed-first-guardrail schema` | Prints the JSON schema | 0 |
+| `seed-first-guardrail kpi-export --audit A [--events E] [--policy P] [--out F] [--delay-days 7] [--k 20] [--demonstration]` | Builds the public snapshot (KPIs, model scorecards, public alerts) | 0 |
+| `seed-first-guardrail dashboard --snapshot F --out index.html` | Renders the dashboard | 0 |
+| `seed-first-guardrail monitor --audit A [--events E] [--out alerts.jsonl]` | Runs the compliance agents | 0, 2 on a critical alert |
+| `seed-first-guardrail policy-diff OLD NEW` | Reviews a policy change before deployment (CA-5) | 0, 2 on a critical finding |

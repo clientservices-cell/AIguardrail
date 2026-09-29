@@ -47,17 +47,23 @@ async def guarded_call(
     options: dict[str, Any] | None,
     *,
     meter_energy: bool = True,
+    model: str | None = None,
 ) -> tuple[Any, GuardrailDecision]:
     """Run ``call()`` inside the guardrail; return the raw SDK response or raise.
 
     Screens every channel of the request and the response. Content that cannot be
     inspected is refused unless the policy sets ``unscreenable_content='allow'``.
-    Energy is reconciled from the response's token usage when available.
+    Energy is reconciled from the response's token usage when available. The model that
+    served the call (``response.model``, else the requested ``model``) is recorded as the
+    ``model`` label, so public scorecards can name it.
     """
     opts = dict(options or {})
     metadata = dict(opts.pop("metadata", None) or {})
     channels: list[str] = sorted(request.channels) or ["text"]
     metadata["channels"] = channels  # the same list object is extended after the call
+    caller_named_model = "model" in metadata
+    if model and not caller_named_model:
+        metadata["model"] = model
     block_unscreenable = guardrail.config.unscreenable_content == "block"
     who = {k: opts.get(k) for k in ("principal", "tenant")}
 
@@ -74,6 +80,9 @@ async def guarded_call(
 
     async def completion(_: str) -> str:
         holder["response"] = await call()
+        served = getattr(holder["response"], "model", None)
+        if isinstance(served, str) and served and not caller_named_model:
+            metadata["model"] = served
         extracted = extract(holder["response"])
         holder["unscreenable"] = extracted.unscreenable
         channels.extend(sorted(extracted.channels - set(channels)))

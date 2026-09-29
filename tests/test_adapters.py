@@ -294,3 +294,30 @@ async def test_llamaindex(make_guardrail: Factory) -> None:
         await bad.acomplete("hi")
     with pytest.raises(GuardrailViolation):
         await bad.achat([])
+
+
+async def test_adapters_record_the_serving_model(make_guardrail: Factory, sink: Any) -> None:
+    async def create(**kw: Any) -> Any:
+        return SimpleNamespace(
+            model="claude-opus-5-20260901",  # the served snapshot, not the requested alias
+            content=[SimpleNamespace(type="text", text=SAFE)],
+        )
+
+    guarded = GuardedAnthropic(
+        SimpleNamespace(messages=SimpleNamespace(create=create)), make_guardrail()
+    )
+    await guarded.messages.create(model="claude-opus-5", max_tokens=10, messages=[])
+    assert sink.records[-1].labels["model"] == "claude-opus-5-20260901"
+
+    # The requested model is recorded when the response doesn't name one, including blocks.
+    with pytest.raises(GuardrailViolation):
+        await GuardedOpenAI(fake_openai(HARMFUL), make_guardrail()).chat.completions.create(
+            model="gpt-test", messages=[]
+        )
+    assert sink.records[-1].labels["model"] == "gpt-test"
+
+    # A caller-supplied model label wins.
+    await GuardedOpenAI(fake_openai(SAFE), make_guardrail()).chat.completions.create(
+        model="gpt-test", messages=[], guardrail_options={"metadata": {"model": "router-x"}}
+    )
+    assert sink.records[-1].labels["model"] == "router-x"

@@ -42,7 +42,7 @@ logger = logging.getLogger("seed_first_guardrail.audit")
 KEY_ENV = "SEED_FIRST_AUDIT_KEY"
 GENESIS = "GENESIS"
 #: Caller-supplied labels that may be stored (for KPI disaggregation); nothing else is kept.
-LABEL_KEYS = ("language", "topic", "region", "task_class", "cohort", "target_group")
+LABEL_KEYS = ("model", "language", "topic", "region", "task_class", "cohort", "target_group")
 _REDACT = {"matched", "rationale"}
 
 

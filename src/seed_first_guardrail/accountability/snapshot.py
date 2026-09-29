@@ -29,6 +29,7 @@ from .. import __version__
 from .agents import ComplianceMonitor
 from .events import as_dicts, parse_time
 from .kpis import KPI_DEFINITIONS, compute_kpis
+from .scorecards import model_scorecards, rating_method
 
 SCHEMA_VERSION = "1.0"
 COMMUNITY_DIMENSIONS = ("language", "region", "cohort", "target_group", "group")
@@ -143,6 +144,8 @@ def build_snapshot(
         "disclaimer": DISCLAIMER,
         "kpis": kpis,
         "alerts": alerts,
+        "models": model_scorecards(published, published_events, k=k),
+        "rating_method": dict(rating_method()),
     }
 
 

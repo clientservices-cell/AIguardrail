@@ -325,7 +325,10 @@ class SeedFirstGuardrailProxy:
             is_macro_policy_proposal=is_macro_policy_proposal,
             affects_community=affects_community,
             community_consent=community_consent,
-            metadata=dict(metadata or {}),
+            # Shared, not copied: SDK adapters fill in what is only known once the model
+            # has answered (extra channels, the served model name) before the audit record
+            # is written. The guardrail itself only ever reads it.
+            metadata=metadata if metadata is not None else {},
             principal=principal,
             tenant=tenant,
         )

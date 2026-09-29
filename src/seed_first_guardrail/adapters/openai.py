@@ -38,6 +38,7 @@ class _Completions:
             lambda: self._owner._client.chat.completions.create(**kwargs),
             openai_response,
             guardrail_options,
+            model=kwargs.get("model"),
             meter_energy=self._owner.meter_energy,
         )
         return response

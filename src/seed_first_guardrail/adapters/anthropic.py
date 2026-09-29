@@ -44,6 +44,7 @@ class _Messages:
             lambda: self._owner._client.messages.create(**kwargs),
             anthropic_response,
             guardrail_options,
+            model=kwargs.get("model"),
             meter_energy=self._owner.meter_energy,
         )
         return response
