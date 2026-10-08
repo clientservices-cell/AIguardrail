@@ -30,18 +30,80 @@ def test_content_to_text() -> None:
     assert content_to_text("a") == "a"
     parts = [
         {"type": "text", "text": "a"},
-        {"type": "image_url", "image_url": {}},
+        {"type": "image_url", "image_url": {}},  # unscreenable: reported, not text
         SimpleNamespace(type="text", text="b"),
-        SimpleNamespace(type="tool_use"),
-        "c",
+        SimpleNamespace(type="tool_use", name="lookup", input={"q": "c"}),
+        "d",
     ]
-    assert content_to_text(parts) == "a\nb\nc"
-    assert content_to_text(SimpleNamespace(content="d")) == "d"
+    assert content_to_text(parts) == 'a\nb\nlookup {"q": "c"}\nd'
+    assert content_to_text(SimpleNamespace(text="e")) == "e"
 
 
 def test_messages_to_prompt() -> None:
     msgs = [{"role": "user", "content": "hi"}, SimpleNamespace(role="assistant", content="yo")]
-    assert messages_to_prompt(msgs, system="be kind") == "system: be kind\nuser: hi\nassistant: yo"
+    text = messages_to_prompt(msgs, system="be kind")
+    assert text.splitlines()[0] == "be kind"
+    assert "hi" in text and "yo" in text
+
+
+def test_channel_extraction_edge_cases() -> None:
+    from seed_first_guardrail.adapters._channels import (
+        anthropic_request,
+        block_parts,
+        generic_value,
+        openai_response,
+    )
+
+    req = anthropic_request(
+        {
+            "system": [{"type": "text", "text": "sys"}],
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "document", "source": {"type": "text", "data": "doc text"}},
+                        {
+                            "type": "document",
+                            "source": {
+                                "type": "content",
+                                "content": [{"type": "text", "text": "inner"}],
+                            },
+                        },
+                        {
+                            "type": "document",
+                            "source": {"type": "base64", "media_type": "application/pdf"},
+                        },
+                        {"type": "redacted_thinking", "data": "x"},
+                        {"type": "mystery"},
+                    ],
+                }
+            ],
+            "tools": [{"name": "t", "description": "desc"}],
+        }
+    )
+    assert {"system", "document", "tool_definition"} <= req.channels
+    assert req.unscreenable == {"document:application/pdf", "unknown:mystery"}
+    assert block_parts({"type": "refusal", "refusal": "no"}).text == "no"
+
+    legacy = SimpleNamespace(
+        content=None,
+        refusal="nope",
+        tool_calls=None,
+        function_call=SimpleNamespace(name="f", arguments="not json"),
+        audio=object(),
+    )
+    out = openai_response(SimpleNamespace(choices=[SimpleNamespace(message=legacy)]))
+    assert "nope" in out.text and "f not json" in out.text and "audio" in out.unscreenable
+
+    msg = SimpleNamespace(
+        content="hi",
+        tool_calls=[{"name": "go", "args": {"a": 1}}],
+        additional_kwargs={"tool_calls": [{"function": {"name": "h", "arguments": "{}"}}]},
+    )
+    assert generic_value(msg).channels == {"text", "tool_use"}
+    assert generic_value({1, 2.5}).text in ("1\n2.5", "2.5\n1")
+    assert generic_value(object()).text.startswith("<object")
+    assert generic_value(None).text == ""
 
 
 # -- OpenAI ------------------------------------------------------------------------
@@ -126,7 +188,11 @@ async def test_anthropic_approved_and_blocked(make_guardrail: Factory) -> None:
 
 
 async def test_anthropic_prompt_is_screened(make_guardrail: Factory) -> None:
-    guarded = GuardedAnthropic(fake_anthropic(SAFE), make_guardrail())
+    from seed_first_guardrail import PolicyConfig
+
+    guarded = GuardedAnthropic(
+        fake_anthropic(SAFE), make_guardrail(PolicyConfig(screen_prompts=True))
+    )
     with pytest.raises(GuardrailViolation) as exc:
         await guarded.messages.create(
             model="claude-opus-5",
@@ -150,15 +216,15 @@ class FakeRunnable:
 
 
 def test_input_output_conversion() -> None:
+    # Every string value is screened, not only the "input" key (review AR-01).
     assert input_to_text("x") == "x"
     assert input_to_text(SimpleNamespace(to_string=lambda: "pv")) == "pv"
-    assert input_to_text({"question": "q"}) == "q"
-    assert input_to_text({"a": 1, "b": "c"}) == "a: 1\nb: c"
-    assert input_to_text([{"role": "user", "content": "m"}]) == "user: m"
+    assert input_to_text({"question": "q", "context": "c"}) == "q\nc"
+    assert input_to_text({"a": 1, "b": "c"}) == "1\nc"
+    assert input_to_text([{"role": "user", "content": "m"}]) == "user\nm"
     assert input_to_text(7) == "7"
     assert output_to_text(SimpleNamespace(content="ai")) == "ai"
     assert output_to_text({"answer": "a"}) == "a"
-    assert output_to_text({"other": 1}) == "{'other': 1}"
 
 
 async def test_runnable_async(make_guardrail: Factory) -> None:
@@ -228,3 +294,30 @@ async def test_llamaindex(make_guardrail: Factory) -> None:
         await bad.acomplete("hi")
     with pytest.raises(GuardrailViolation):
         await bad.achat([])
+
+
+async def test_adapters_record_the_serving_model(make_guardrail: Factory, sink: Any) -> None:
+    async def create(**kw: Any) -> Any:
+        return SimpleNamespace(
+            model="claude-opus-5-20260901",  # the served snapshot, not the requested alias
+            content=[SimpleNamespace(type="text", text=SAFE)],
+        )
+
+    guarded = GuardedAnthropic(
+        SimpleNamespace(messages=SimpleNamespace(create=create)), make_guardrail()
+    )
+    await guarded.messages.create(model="claude-opus-5", max_tokens=10, messages=[])
+    assert sink.records[-1].labels["model"] == "claude-opus-5-20260901"
+
+    # The requested model is recorded when the response doesn't name one, including blocks.
+    with pytest.raises(GuardrailViolation):
+        await GuardedOpenAI(fake_openai(HARMFUL), make_guardrail()).chat.completions.create(
+            model="gpt-test", messages=[]
+        )
+    assert sink.records[-1].labels["model"] == "gpt-test"
+
+    # A caller-supplied model label wins.
+    await GuardedOpenAI(fake_openai(SAFE), make_guardrail()).chat.completions.create(
+        model="gpt-test", messages=[], guardrail_options={"metadata": {"model": "router-x"}}
+    )
+    assert sink.records[-1].labels["model"] == "router-x"

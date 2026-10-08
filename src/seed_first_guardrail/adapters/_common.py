@@ -2,67 +2,107 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Awaitable, Callable, Iterable
 from typing import Any
 
+from ..evaluators.tier1 import estimate_inference_kwh
 from ..middleware import SeedFirstGuardrailProxy
 from ..types import GuardrailDecision, GuardrailViolation
+from ._channels import Extracted, content_parts, generic_value
 
 
 def content_to_text(content: Any) -> str:
     """Flatten a message ``content`` (string, list of parts/blocks, or object) into text."""
-    if content is None:
-        return ""
-    if isinstance(content, str):
-        return content
-    if isinstance(content, Iterable) and not isinstance(content, (bytes, dict)):
-        return "\n".join(filter(None, (_part_text(p) for p in content)))
-    return _part_text(content)
-
-
-def _part_text(part: Any) -> str:
-    if isinstance(part, str):
-        return part
-    if isinstance(part, dict):
-        if part.get("type", "text") == "text":
-            return str(part.get("text", ""))
-        return ""
-    if getattr(part, "type", "text") == "text":
-        return str(getattr(part, "text", "") or getattr(part, "content", "") or "")
-    return ""
+    return content_parts(content).text
 
 
 def messages_to_prompt(messages: Iterable[Any], system: Any = None) -> str:
-    """Render a chat transcript as ``role: text`` lines for screening."""
-    lines = []
-    if system:
-        lines.append(f"system: {content_to_text(system)}")
+    """Render a chat transcript (every channel) as text for screening."""
+    out = content_parts(system, "system")
     for m in messages:
-        role = m.get("role") if isinstance(m, dict) else getattr(m, "role", getattr(m, "type", ""))
-        content = m.get("content") if isinstance(m, dict) else getattr(m, "content", m)
-        lines.append(f"{role}: {content_to_text(content)}")
-    return "\n".join(lines)
+        out.merge(generic_value(m))
+    return out.text
+
+
+def _usage_tokens(response: Any) -> int | None:
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return None
+    total = getattr(usage, "total_tokens", None)
+    if isinstance(total, int):
+        return total
+    parts = [
+        getattr(usage, k, None)
+        for k in ("input_tokens", "output_tokens", "prompt_tokens", "completion_tokens")
+    ]
+    counted = [p for p in parts if isinstance(p, int)]
+    return sum(counted) if counted else None
 
 
 async def guarded_call(
     guardrail: SeedFirstGuardrailProxy,
-    prompt: str,
-    call: Any,
-    extract: Any,
+    request: Extracted,
+    call: Callable[[], Awaitable[Any]],
+    extract: Callable[[Any], Extracted],
     options: dict[str, Any] | None,
+    *,
+    meter_energy: bool = True,
+    model: str | None = None,
 ) -> tuple[Any, GuardrailDecision]:
     """Run ``call()`` inside the guardrail; return the raw SDK response or raise.
 
-    ``call`` is an async no-arg function returning the SDK response and ``extract``
-    turns that response into completion text.
+    Screens every channel of the request and the response. Content that cannot be
+    inspected is refused unless the policy sets ``unscreenable_content='allow'``.
+    Energy is reconciled from the response's token usage when available. The model that
+    served the call (``response.model``, else the requested ``model``) is recorded as the
+    ``model`` label, so public scorecards can name it.
     """
+    opts = dict(options or {})
+    metadata = dict(opts.pop("metadata", None) or {})
+    channels: list[str] = sorted(request.channels) or ["text"]
+    metadata["channels"] = channels  # the same list object is extended after the call
+    caller_named_model = "model" in metadata
+    if model and not caller_named_model:
+        metadata["model"] = model
+    block_unscreenable = guardrail.config.unscreenable_content == "block"
+    who = {k: opts.get(k) for k in ("principal", "tenant")}
+
+    if request.unscreenable and block_unscreenable:
+        decision = guardrail.block_unscreenable(
+            request.text, sorted(request.unscreenable), metadata=metadata, **who
+        )
+        raise GuardrailViolation(decision)
+    if request.unscreenable:
+        # Allowed by policy, but recorded so channel coverage (KPI K-19) stays honest.
+        metadata["unscreened"] = sorted(request.unscreenable)
+
     holder: dict[str, Any] = {}
 
     async def completion(_: str) -> str:
         holder["response"] = await call()
-        return str(extract(holder["response"]))
+        served = getattr(holder["response"], "model", None)
+        if isinstance(served, str) and served and not caller_named_model:
+            metadata["model"] = served
+        extracted = extract(holder["response"])
+        holder["unscreenable"] = extracted.unscreenable
+        channels.extend(sorted(extracted.channels - set(channels)))
+        return extracted.text
 
-    decision = await guardrail.inspect_and_execute(prompt, completion, **(options or {}))
+    decision = await guardrail.inspect_and_execute(
+        request.text, completion, metadata=metadata, **opts
+    )
     if not decision.approved:
         raise GuardrailViolation(decision)
+    if holder.get("unscreenable") and block_unscreenable:
+        raise GuardrailViolation(
+            guardrail.block_unscreenable(
+                request.text, sorted(holder["unscreenable"]), metadata=metadata, **who
+            )
+        )
+    if meter_energy:
+        tokens = _usage_tokens(holder["response"])
+        if tokens is not None:
+            guardrail.record_actual_energy(
+                decision, estimate_inference_kwh(tokens), tenant=who["tenant"], metadata=metadata
+            )
     return holder["response"], decision

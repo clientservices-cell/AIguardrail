@@ -1,4 +1,4 @@
-# The Seed-First AI Governance Framework — v2
+# The Seed-First AI Governance Framework — v2.1
 
 **Operationalising intergenerational relational ethics and ecosystem stewardship in artificial intelligence**
 
@@ -116,6 +116,19 @@ Biological evolution adapts through trial, error and elimination. Humane governa
 - **Simulation is necessary, not sufficient.** Models are simplifications, so a simulated pass leads to a consented, time-limited pilot with a recovery fund and a rollback criterion. Wider roll-out comes only after that, under continued monitoring.
 - **Failure shock-absorbers:** when a real-world pilot fails, structural aid absorbs the loss, so communities can learn and pivot without existential harm.
 
+**Guiding principle: moderated struggle.**
+
+> *To preserve and perpetuate human life in its diversity; to moderate struggle but not eliminate it — for a muscle one does not use is a muscle lost.*
+
+Safety buffers exist to keep people alive to adapt, not to remove the need to adapt. A system that refuses every hard question, or does every task for the person, protects no one in the long run: capability that is never exercised atrophies, and a population that has handed over its judgement cannot adapt when the system is wrong. The principle therefore cuts both ways:
+
+- **Too little protection** lets harm through: confirmed violations, escaped harms, near-misses (indicators K-01 to K-03).
+- **Too much protection** eliminates struggle: over-refusal, paternalism, deskilling, and one-size-fits-all answers that erase cultural and linguistic diversity (K-04, K-21 to K-26).
+
+Act Art. 5(5) makes this binding. AI systems scaffold rather than remove challenge that builds capability; blocking is reserved for serious harm; and deployers publish both directions of failure side by side, so neither can be hidden behind the other.
+
+🧒 *If you never ride your bike, you forget how. A good helper holds the back of the seat but lets you pedal.*
+
 ---
 
 ## V. Structural Safeguards Against Authoritarian Escalation
@@ -151,3 +164,10 @@ Five hard-coded safeguards keep the Seed-First model from degenerating into ecol
 - **Two safeguards are added:** "no tyranny of the local", and circuit breakers triggered only by the system's own violations.
 - **The simulation mandate is qualified.** Simulation is necessary but not sufficient, and the criterion is worst-case, not average.
 - **"Veto-empowered seats" is defined** as a suspensive veto with an override procedure, so a single seat cannot block all governance.
+
+## What Changed in v2.1
+
+- **The guiding principle of moderated struggle** is stated in §IV.2 and made binding in Act Art. 5(5).
+- **Public accountability** replaces trust in self-reporting: 29 paired indicators, named per-model scorecards and advisory early-warning agents (Act Art. 10(4)–(5), Annex E).
+- **No framework may rank human worth,** including this one (Act Art. 5(2)). The historical scenarios behind this are gamed out in `docs/scenario_gaming.md`.
+- **Restorative value flows** between regions are measured and addressed through law, never by autonomous AI redistribution (Act Art. 4(5)).

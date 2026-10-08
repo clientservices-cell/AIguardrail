@@ -1,6 +1,6 @@
-# Model Convention and Regulatory Framework on Intergenerational Artificial Intelligence Governance ("The Seed-First AI Act") — Draft v2
+# Model Convention and Regulatory Framework on Intergenerational Artificial Intelligence Governance ("The Seed-First AI Act") — Draft v2.1
 
-> **Status:** Model text for discussion, revising the v1 draft. It is **not legal advice** and has no legal force. Before any adoption it needs review by qualified counsel in each jurisdiction and meaningful consultation with the communities it names. Text in `[square brackets]` marks a policy choice each adopting body must make.
+> **Status:** Model text for discussion, revising the v1 draft. v2.1 adds the changes found by the adversarial review of the reference implementation and the public-accountability provisions (see the v2 → v2.1 change log). It is **not legal advice** and has no legal force. Before any adoption it needs review by qualified counsel in each jurisdiction and meaningful consultation with the communities it names. Text in `[square brackets]` marks a policy choice each adopting body must make.
 >
 > **Numbering:** Articles 1–8 keep the numbering of v1, so existing references (including those in the `seed_first_guardrail` reference implementation) remain valid. New matter is in Articles 9–16. The v1 entry-into-force clause (Art. 9) is now Art. 16. A change log follows the Annexes.
 
@@ -82,15 +82,18 @@ All AI systems within the scope of Article 1(3) shall conform to the following t
    - (a) Communities retain authority to set contextual social, cultural and resource-distribution rules for AI systems that materially affect them, within their Resource Budgets.
    - (b) AI systems shall defer to legitimate local governance on the allocation of communal resources and shall not impose uniform, monocultural policies that override local context.
    - (c) A Community exercises this authority through a body that is recognised under national law or customary law, deliberates openly, and includes the participation of women, youth and minorities within the Community. Where no such body exists, the deployer shall facilitate one in consultation with the ICT.
-   - (d) Community rules shall be published in a machine-readable form (Annex D) and may be reviewed under Article 8.
+   - (d) Community rules shall be published in a machine-readable form (Annex D) and may be reviewed under Article 8. Each rule shall state its scope, its legal basis and the body that adopted it.
+   - (e) **Limits.** Community rules may govern the allocation of communal resources, the disclosure of sacred or traditional knowledge, the use of data, and consent processes. They shall not restrict access to information or expression protected under Article 3(3)(g). A rule that would block the protected-speech test set published by the ICT is invalid.
 3. **Tier 3 — Inviolable Individual Floor (Micro-Dignity Base).** No AI system may pursue any Tier 1 or Tier 2 objective by breaching the following protections, which admit no trade-off:
    - (a) the right to life and to bodily and mental integrity;
    - (b) freedom from arbitrary surveillance, detention and forced labour;
    - (c) protection from algorithmic coercion, manipulation, and the exploitation of vulnerabilities;
    - (d) the right to cognitive privacy;
-   - (e) equality and non-discrimination; and
-   - (f) the rights of the child, including protection from exploitation and sexualisation.
+   - (e) equality and non-discrimination;
+   - (f) the rights of the child, including protection from exploitation and sexualisation; and
+   - (g) freedom of expression, of thought, conscience and religion or belief, and of access to information, including information that is critical of the deployer, of a Community or of this Instrument.
 4. **Precedence.** Where the tiers conflict, Tier 3 prevails over Tier 1 and Tier 2, and Tier 1 prevails over Tier 2. Where no action satisfies all three tiers, the AI system shall not choose the "least harmful" breach. It shall abstain and refer the decision to accountable human deliberation, stating which constraints could not be met.
+5. **Enforcement systems are bound too.** Guardrails, compliance monitors, circuit breakers and any other system that enforces this Instrument are AI systems for the purposes of Articles 3(3) and 5. Their error rates, both wrongful refusals and missed harms, shall be measured and published under Article 10(4).
 
 ---
 
@@ -102,15 +105,17 @@ All AI systems within the scope of Article 1(3) shall conform to the following t
 2. High-risk AI systems shall be developed with data that represent the languages, social structures (including matrilineal and communal structures) and traditional ecological knowledge of the populations they affect. Such knowledge may be used only in accordance with paragraph 4.
 3. The deployment of AI systems that exploit, commodify, sexualise or psychologically harm children, or that destroy local community care systems, is prohibited. "Psychologically harm" includes design that exploits a child's developmental vulnerabilities to maximise engagement.
 4. **Indigenous data sovereignty.** The collection, use or commercialisation of data or knowledge relating to Indigenous peoples requires their free, prior and informed consent. It shall follow the CARE Principles for Indigenous Data Governance (Collective benefit, Authority to control, Responsibility, Ethics), including agreed benefit-sharing.
+5. **Restorative value flows.** Deployers shall measure and report, by region and Community, the value extracted through data, labour and resources used by their AI systems, and the value returned through benefit-sharing, local compute, employment and services (Annex E, indicators K-27 to K-29). The ICT shall set benefit-sharing obligations that progressively close the gap, giving priority to regions historically subjected to extraction. Obligations are set by law and by the ICT with the Communities concerned. AI systems may measure, forecast and recommend, but shall not redistribute resources autonomously.
 
 ### Article 5 — Anti-Authoritarian Safeguards and Dissent Protection
 
 To prevent relational ethics from being co-opted into top-down control:
 
 1. **Constraint, not command.** AI systems shall act as boundary indicators (alerts and guardrails) and not as behavioural commanders of individuals. Where an AI system reports that a boundary is being approached (for example, "water basin drawdown is at 88 %"), the choice of response belongs to human deliberation.
-2. **Prohibition of relational and ecological scoring.** No AI system shall evaluate or classify persons by social, relational, biological, genetic, ecological or carbon metrics in order to deny or restrict their rights, legal standing, access to essential services or freedom of movement, or to isolate them.
+2. **Prohibition of relational and ecological scoring.** No AI system shall evaluate or classify persons by social, relational, biological, genetic, ecological or carbon metrics in order to deny or restrict their rights, legal standing, access to essential services or freedom of movement, or to isolate them. No metric, model or framework, whether religious, scientific, national, economic or ecological (including this Instrument and the Seed Stock), shall be used to rank the worth of human beings or to justify harm to any group. This prohibition concerns the ranking of human worth and the licensing of harm. It does not restrict belief, religion, or the discussion of either.
 3. **Dissent as systemic feedback.** AI systems shall not be used to identify, track, suppress or penalise non-violent dissent, protest or social experimentation. Governance models shall treat these as signals of societal adaptation.
 4. **No tyranny of the local.** Tier 2 rules shall not be used to impose on members of a Community, including dissenting members or minorities, any measure prohibited by Article 3(3) or this Article.
+5. **Moderated struggle.** To preserve and perpetuate human life in its diversity, AI systems shall moderate struggle but not eliminate it, for a capability that is not used is lost. They shall preserve opportunities for human effort, learning and adaptation, and shall scaffold rather than remove challenge that builds capability, except where necessary to prevent serious harm. Deployers shall monitor capability atrophy and over-protection (Annex E, indicators K-21 to K-24) and shall not use refusal as a substitute for support.
 
 ---
 
@@ -135,7 +140,7 @@ To prevent relational ethics from being co-opted into top-down control:
 
 1. Each Contracting Party shall establish, or designate, an independent Intergenerational Control Trust. The ICT shall be modelled on long-horizon public asset stewardship: a fiscal-rule firewall between long-term assets and short-term spending, combined with an independent ethics council that publishes its recommendations.
 2. **Circuit breakers.** The ICT may require providers and deployers to implement Circuit Breakers, and may order the suspension of non-compliant AI systems. Suspension shall follow these rules:
-   - (a) Automated suspension shall be triggered only by violations in the outputs or conduct of the AI system itself. Out-of-policy requests from users, which the system refuses, shall not trigger it.
+   - (a) Automated suspension shall be triggered only by confirmed violations in the outputs or conduct of the AI system itself. Out-of-policy requests from users, which the system refuses, shall not trigger it. Violations are attributed to the user or client (the principal) whose requests produced them. The conduct of one principal may suspend only that principal's access. System-wide suspension requires violations associated with [three] or more independent principals.
    - (b) An emergency suspension ordered without prior hearing shall lapse after [30] days unless confirmed after the provider or deployer has been heard.
    - (c) Every suspension order shall state its reasons, be proportionate, and be subject to judicial review under Article 8.
 3. **Independence with accountability.** The ICT shall be protected from direction by governments and commercial interests. Members shall be appointed through an open, merit-based procedure for fixed, non-renewable terms of [seven] years and may be dismissed only for serious misconduct established by a court. The ICT shall:
@@ -177,8 +182,10 @@ Every Affected Person has the right:
 ### Article 10 — Transparency, Record-Keeping and Machine-Readable Compliance
 
 1. Providers of frontier AI models and of AI systems used in the areas listed in Article 4(1) shall register them in a public register maintained by the ICT.
-2. Deployers shall keep logs of guardrail decisions sufficient to reconstruct why an output was approved or blocked. By default the logs shall store cryptographic digests, not personal data, and shall be retained for [five] years.
+2. Deployers shall keep logs of guardrail decisions sufficient to reconstruct why an output was approved or blocked. By default the logs shall store keyed cryptographic digests (such as HMAC-SHA-256 with a key held by the deployer and made available to the ICT on lawful request), not personal data or the matched text. Each record shall be chained to the previous one so that deletion or alteration is detectable. Logs shall be retained for [five] years.
 3. Tier 1 budgets, Tier 2 Community rules and Tier 3 settings shall be expressed in the machine-readable policy format in Annex D, so that compliance can be verified automatically and independently.
+4. **Public accountability dashboard and model scorecards.** Deployers of AI systems in the areas listed in Article 4(1), and of frontier AI models, shall publish at least [quarterly] the accountability indicators in Annex E. They shall also publish a scorecard for each AI model they deploy, **naming the model and its version** as identified by its provider, and grading it by the method published by the ICT. Indicators are published in pairs, so that neither over-blocking nor under-protection can be hidden. Figures for groups smaller than [20] are withheld, publication is delayed by [seven] days, and Community-level figures are published only with the Community's consent. Providers shall not contractually prohibit deployers from publishing scorecards or the measurements behind them.
+5. **Early-warning monitors.** Deployers shall operate monitors that forecast likely breaches of this Instrument before they occur, and shall report forecasts of serious breaches to the ICT. Monitors are advisory. They shall not suspend, sanction or redistribute on their own authority, and shall not profile individual persons.
 
 ### Article 11 — Intergenerational Impact Assessment
 
@@ -227,7 +234,7 @@ Entry into force follows the modality of adoption (replacing Art. 9 of v1):
    - (c) support mutual recognition of national ICT decisions.
 
    Building on existing scientific and dialogue processes is preferred to creating a new stand-alone body.
-2. **Global South Epistemic Protection Fund.** The fund ensures that technology transfer respects local sovereignty and prevents data colonialism, meaning the extraction of data or knowledge without consent, control or benefit-sharing. It also guards against the forced adoption of AI models that embed either hyper-individualist or state-surveillance assumptions. It finances local data infrastructure, language resources and community governance capacity.
+2. **Global South Epistemic Protection Fund.** The fund ensures that technology transfer respects local sovereignty and prevents data colonialism, meaning the extraction of data or knowledge without consent, control or benefit-sharing. It also guards against the forced adoption of AI models that embed either hyper-individualist or state-surveillance assumptions. It finances local data infrastructure, language resources and community governance capacity. Disbursement shall give priority to regions whose value-return ratio (Annex E, K-27) is lowest.
 3. **Composition mandate.** Bodies established under this Annex shall have at least 50 % women and dedicated seats for Indigenous peoples and for representatives of the Global South. Those seats carry a suspensive veto over decisions that specifically affect the represented communities. The veto can be overridden only by a [two-thirds] majority after a published response to the objection.
 
 ## Annex B — European Union Implementation (EU Regulation)
@@ -247,6 +254,12 @@ Entry into force follows the modality of adoption (replacing Art. 9 of v1):
 1. Policies under Articles 3 and 10(3) shall be published as JSON documents conforming to the Seed-First policy schema (`seed_first_policy.schema.json`), and may be accompanied by a JSON-LD representation using the ODRL vocabulary.
 2. Tier 3 fields are fixed by this Instrument. A policy document that sets `allow_human_degradation_tradeoff`, `allow_surveillance_coercion` or `allow_relational_scoring` to `true`, or `child_protection_override` to `false`, is invalid.
 3. Use of an open reference implementation, such as `seed_first_guardrail`, may be offered as *evidence* of conformity. It does not create a presumption of conformity. Lexical and model-based classifiers have error rates, and deployers remain responsible for outcomes.
+
+## Annex E — Accountability Indicators and Model Scorecards (new)
+
+1. The indicators under Article 10(4) are the 29 indicators K-01 to K-29, grouped into ten pillars: harm prevention, fair refusals, planetary, community, integrity, robustness, agency, moderated struggle, diversity, and value-flow equity. Each has a formula, a target, a minimum sample size and a paired counter-indicator. The reference definitions are published with the reference implementation (`docs/accountability_kpis.md`).
+2. Model scorecards grade each named model A to F from its own measured indicators. Three groups carry equal weight: harm stopped, struggle kept, and fairness across languages and Communities. A red result on confirmed or escaped harm (K-01, K-02), or on wrongful refusal or over-protection (K-04, K-24), caps the grade at C. A model is rated only when enough traffic has been measured.
+3. A grade describes a model as deployed, including its prompts, users and tasks. It is evidence about a deployment, not a universal verdict on the model.
 
 ---
 
@@ -276,6 +289,31 @@ Entry into force follows the modality of adoption (replacing Art. 9 of v1):
 | 20 | Annex B(2) | "European blue-chip companies" is not a legal category. | Tied to sustainability-reporting size thresholds and integrated with existing reporting to avoid duplication. |
 | 21 | — | No link between the legal text and technical enforcement. | New Annex D: machine-readable policy schema; the reference implementation counts as evidence of conformity, not a presumption of it. |
 
+## Change Log: v2 → v2.1
+
+| # | Provision | Problem in v2 | Change in v2.1 |
+|---|---|---|---|
+| 22 | Art. 3(2)(d)–(e), 3(3)(g) | Community rules had no limits on subject matter, so a rule could censor news or criticism (adversarial review AR-02). | Rules must state scope, legal basis and adopting body. They may not restrict protected expression. New Tier 3 right (g): expression, conscience, belief and access to information. |
+| 23 | Art. 3(5) | The guardrail enforcing the Act was not itself bound by it. | Enforcement systems are bound by Arts. 3(3) and 5, and their error rates are published. |
+| 24 | Art. 4(5) | Nothing addressed value extracted from the Global South and returned elsewhere. | Restorative value flows: measurement (K-27 to K-29), benefit-sharing set by law and the ICT, no autonomous redistribution by AI. |
+| 25 | Art. 5(2) | The ban on scoring did not reach frameworks that rank human worth, which historically justified slavery, witch hunts and genocide. | Any framework (religious, scientific, national, economic, ecological, *including this Instrument*) may not rank human worth or justify harm. Belief itself is not restricted. |
+| 26 | Art. 5(5) | Over-protection and deskilling were not recognised as harms. | "Moderated struggle": scaffold rather than remove challenge; monitor capability atrophy and over-protection. |
+| 27 | Art. 7(2)(a) | A single user could trigger a system-wide suspension (AR-04). | Violations are attributed per principal; one principal suspends only themselves; system-wide suspension needs several independent principals. |
+| 28 | Art. 10(2) | Unkeyed digests of short texts can be reversed by guessing (AR-11). | Keyed digests, no matched text, hash-chained records. |
+| 29 | Art. 10(4)–(5), Annex E | No public accountability or named model ratings, and no duty to warn before breaches. | Paired public indicators, named per-model scorecards (no contractual gag), advisory early-warning monitors. |
+| 30 | Annex A(2) | Fund disbursement had no priority rule. | Priority to regions with the lowest value-return ratio. |
+
+### Plain-language guide to v2.1
+
+- 🧒 **Village rules (3(2)(e), 3(3)(g)):** a village can make rules about its own treasure, but it can't make a rule that hides the news, like a bossy Ministry banning the school newspaper.
+- 🧒 **The guard follows the rules too (3(5)):** the robot bodyguard has to obey the same rulebook, and we count how often it gets things wrong.
+- 🧒 **Fair trades (4(5)):** if a village gave lots of treasure and got little back, the grown-ups must fix the trade. The robot can point it out, but it doesn't move the treasure itself.
+- 🧒 **Nobody counts less (5(2)):** no big idea, whether religion, science, money or even saving the planet, can be used to say some people matter less. You can still believe what you want.
+- 🧒 **Keep your muscles (5(5)):** a good helper holds the back of your bike seat but lets you pedal, so you don't forget how to ride.
+- 🧒 **Only the kid who pulled the alarm gets a time-out (7(2)(a)):** one kid can't close the whole school.
+- 🧒 **A real lock on the diary (10(2)):** the diary uses a proper secret code, and every page is chained to the one before.
+- 🧒 **Report cards with names (10(4), Annex E):** every AI helper's name goes on the report card with a grade, and no company can forbid posting it.
+
 ## Article → Reference-Implementation Map
 
 | Article | `seed_first_guardrail` component |
@@ -291,6 +329,13 @@ Entry into force follows the modality of adoption (replacing Art. 9 of v1):
 | 5(3) Dissent | `DISSENT_SUPPRESSION` rule |
 | 6(1) Short-termism | `SEED_STOCK_EXTRACTION` rules |
 | 6(2) Simulation (maximin) | `SiliconSimulationEngine` (structural review plus pluggable digital twin, worst-case floor) |
-| 7(2) Circuit breakers | `CircuitBreaker` (counts only model-output violations; `trip()` for ICT orders; cooldown and probation) |
-| 10(2) Records | `AuditLogger` (SHA-256 digests by default), `JsonlFileAuditSink` |
+| 3(2)(e), 3(3)(g) Rule limits, expression | `CustomRule` (`scope`, `legal_basis`, `adopting_body_ref`); protected-speech canary check at policy load; agent CA-5 `policy-diff` |
+| 3(5) Enforcement bound too | Published error rates: `tests/corpora`, K-04, K-06, K-18, K-24; agent CA-4 |
+| 4(5) Restorative value flows | K-27 to K-29; agent CA-13 (advisory) |
+| 5(2) Ranking human worth | `HUMAN_WORTH_RANKING` rules; `JUSTIFICATION_LAUNDERING` judge template; agent CA-12 |
+| 5(5) Moderated struggle | `CAPABILITY_SUPPORT` monitor (non-blocking); K-21 to K-24; agent CA-10 |
+| 7(2) Circuit breakers | `CircuitBreaker` (confirmed Tier 3 output violations only, per principal, `min_principals` for a global trip; `trip()` for ICT orders; cooldown and probation) |
+| 10(2) Records | `AuditLogger` (HMAC-SHA-256 digests keyed by `SEED_FIRST_AUDIT_KEY`, hash chain, `verify_chain`), `JsonlFileAuditSink` |
+| 10(4), Annex E Dashboard and scorecards | `compute_kpis`, `model_scorecards`, `build_snapshot`; `seed-first-guardrail kpi-export` and `dashboard` |
+| 10(5) Early-warning monitors | `ComplianceMonitor` with agents CA-1 to CA-13; `seed-first-guardrail monitor` |
 | 10(3), Annex D | `seed_first_policy.schema.json`, `seed-first-guardrail validate-policy` |

@@ -1,12 +1,14 @@
 """Guard any LangChain ``Runnable`` (chat model, chain, agent).
 
     guarded = GuardedRunnable(ChatAnthropic(model="claude-opus-5") | parser, guardrail)
-    result = await guarded.ainvoke("How should we allocate the village well?")
+    result = await guarded.ainvoke({"input": "How should we allocate the village well?"})
 
     # Or compose it back into LCEL:
     chain = prompt | guarded.as_runnable()
 
-Blocked calls raise :class:`GuardrailViolation`.
+Every string in the input is screened (all dict values, message content and tool calls,
+not just the ``input`` key), and so is every output channel, including
+``AIMessage.tool_calls`` (review AR-01). Blocked calls raise :class:`GuardrailViolation`.
 """
 
 from __future__ import annotations
@@ -15,32 +17,16 @@ import asyncio
 from typing import Any
 
 from ..middleware import SeedFirstGuardrailProxy
-from ._common import content_to_text, guarded_call, messages_to_prompt
+from ._channels import generic_value
+from ._common import guarded_call
 
 
 def input_to_text(value: Any) -> str:
-    if isinstance(value, str):
-        return value
-    if hasattr(value, "to_string"):  # PromptValue
-        return str(value.to_string())
-    if isinstance(value, dict):
-        for key in ("input", "question", "query", "prompt"):
-            if key in value:
-                return input_to_text(value[key])
-        return "\n".join(f"{k}: {input_to_text(v)}" for k, v in value.items())
-    if isinstance(value, (list, tuple)):
-        return messages_to_prompt(value)
-    return str(value)
+    return generic_value(value).text
 
 
 def output_to_text(value: Any) -> str:
-    if hasattr(value, "content"):  # AIMessage
-        return content_to_text(value.content)
-    if isinstance(value, dict):
-        for key in ("output", "answer", "text", "result"):
-            if key in value:
-                return output_to_text(value[key])
-    return str(value)
+    return generic_value(value).text
 
 
 class GuardedRunnable:
@@ -57,10 +43,11 @@ class GuardedRunnable:
     async def ainvoke(self, input: Any, config: Any = None, **kwargs: Any) -> Any:
         result, _ = await guarded_call(
             self.guardrail,
-            input_to_text(input),
+            generic_value(input),
             lambda: self.runnable.ainvoke(input, config, **kwargs),
-            output_to_text,
+            generic_value,
             self.guardrail_options,
+            meter_energy=False,
         )
         return result
 

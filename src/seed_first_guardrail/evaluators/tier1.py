@@ -57,6 +57,11 @@ class ComputeBudget:
         with self._lock:
             self._used += kwh
 
+    def refund(self, kwh: float) -> None:
+        """Return energy reserved for a call that failed or used less than estimated."""
+        with self._lock:
+            self._used = max(self._used - kwh, 0.0)
+
     def reset(self) -> None:
         with self._lock:
             self._used = 0.0

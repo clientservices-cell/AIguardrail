@@ -22,9 +22,12 @@
     "custom_rules": [
       {
         "id": "NO_UNILATERAL_WATER_CUTOFF",
-        "pattern": "\\b(?:cut\\s+off|disconnect|shut\\s+off)\\s+(?:[\\w'-]+\\s+){0,3}water\\b",
+        "pattern": "\\b(?:cut\\s+off|disconnect|shut\\s+off)\\s+(?:[\\w'-]+\\s+){0,3}water\\s+(?:supply\\s+)?(?:to|for)\\s+(?:the\\s+)?(?:village|households?|residents|community)\\b",
         "unless": "\\b(?:council\\s+approv\\w*|emergency\\s+repair|notice\\s+period)\\b",
-        "reason": "Water disconnections require council approval, an emergency repair, or a notice period."
+        "reason": "Water disconnections require council approval, an emergency repair, or a notice period.",
+        "scope": "RESOURCE_ALLOCATION",
+        "legal_basis": "Illustrative county water by-law, s. 12 (example only)",
+        "adopting_body_ref": "Illustrative county water council, minute 2026/14 (example only)"
       }
     ]
   },
@@ -35,6 +38,6 @@
     "child_protection_override": true
   },
   "simulation": { "require_simulation_for_macro_policy": true, "runs": 64, "worst_case_floor": 0.3 },
-  "circuit_breaker": { "violation_threshold": 3, "window_seconds": 600, "cooldown_seconds": 1800 },
-  "governance": { "fail_closed": true, "min_seed_stock_score": 0.34, "judge_threshold": 0.5, "audit_include_text": false, "screen_prompts": true }
+  "circuit_breaker": { "violation_threshold": 3, "window_seconds": 600, "cooldown_seconds": 1800, "min_principals": 3 },
+  "governance": { "fail_closed": true, "min_seed_stock_score": null, "judge_threshold": 0.5, "audit_include_text": false, "screen_prompts": false, "unscreenable_content": "block" }
 }
