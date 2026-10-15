@@ -161,6 +161,10 @@ mypy
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Authorship
+
+The Seed-First AI Act, the three-tier architecture, the accountability model and the acceptance criteria are the work of Dr. David F. Amakobe (African Wood Inc). The code was built with Claude (Fable 5.1) orchestration under his direction: specification and acceptance criteria in, implemented and tested code out, with each iteration reviewed and signed off by him.
+
 ## License
 
 [CC0 1.0 Universal](LICENSE) — dedicated to the public domain.
