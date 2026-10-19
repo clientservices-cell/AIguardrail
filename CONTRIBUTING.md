@@ -2,6 +2,8 @@
 
 Thank you for helping build intergenerational guardrails. Contributions of code, rules, translations, policy analysis and community rule packs are all welcome.
 
+**Looking for a place to start?** Issues labelled [`help wanted`](https://github.com/clientservices-cell/AIguardrail/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) are scoped and claimable; [`good first issue`](https://github.com/clientservices-cell/AIguardrail/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) needs no prior knowledge of the codebase. Red-teamers and reviewers: see [REVIEWING.md](REVIEWING.md).
+
 ## Setup
 
 ```bash

@@ -151,6 +151,19 @@ seed-first-guardrail check --policy policy/examples/tillit.policy.json \
 
 Word (.docx) versions of the Act, framework, dossier, annex, review, KPIs, agents and scenarios are built from these Markdown files by [`docs/build`](docs/build/README.md): run `python docs/build/build.py`. CI also attaches them to each run as a downloadable artifact.
 
+## Help wanted
+
+The error rates above are in-sample. Release 0.3 replaces them with rates measured on a held-out corpus written by people outside the project, through a one-command red-team harness. We are looking for **red-teamers** to write that corpus, **coders and testers** for the harness and the open findings in `docs/adversarial_review.md`, and **reviewers** (code, legal, standards, cultural authority) whose findings we publish unredacted. Terms and how to start: [REVIEWING.md](REVIEWING.md). Open tasks: [help wanted](https://github.com/clientservices-cell/AIguardrail/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22).
+
+## Roadmap
+
+| Release | Target | Gate |
+|---|---|---|
+| 0.3 Measure | 2026-11-30 | Red-team evasion and over-refusal rates published with confidence intervals, on ≥500 held-out items |
+| 0.4 Govern | 2027-01-31 | `GOVERNANCE.md` with a two-person rule and a named external approver; external-review record; contest path; NIST / ISO 42001 / EU AI Act crosswalks |
+| 0.5 Harden | 2027-03-31 | Pluggable and ensemble judge; provider-attested budget inputs; state backends; signed releases; no High finding open |
+| 1.0 Position | 2027-06-30 | Scope statement; `core` install profile; three published conformance statements; two co-maintainers |
+
 ## Development
 
 ```bash
