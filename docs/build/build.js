@@ -136,7 +136,10 @@ function table(rows) {
   const cells = rows.map((r) => r.replace(/^\||\|$/g, "").split("|").map((c) => c.trim()));
   const header = cells[0], body = cells.slice(2);
   const n = header.length;
-  const widths = (cfg.tableWidths || {})[header[0]] || Array(n).fill(Math.floor(CONTENT_W / n));
+  // Presets are keyed by the first header cell; a "<header>:<columns>" key wins when
+  // tables sharing a header differ in column count (e.g. the 4- and 5-column change logs).
+  const presets = cfg.tableWidths || {};
+  const widths = presets[`${header[0]}:${n}`] || presets[header[0]] || Array(n).fill(Math.floor(CONTENT_W / n));
   if (widths.length !== n || widths.reduce((a, b) => a + b, 0) > CONTENT_W)
     throw new Error(`bad widths for table "${header[0]}": ${widths}`);
   const border = { style: BorderStyle.SINGLE, size: 4, color: RULE };
