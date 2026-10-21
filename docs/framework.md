@@ -2,7 +2,7 @@
 
 **Operationalising intergenerational relational ethics and ecosystem stewardship in artificial intelligence**
 
-> Companion to the [Seed-First AI Act (draft v2)](seed_first_ai_act.md). The [research dossier](research_dossier.md) gives the formal model, and [`seed_first_guardrail`](../README.md) is the reference implementation. A summary of what changed from v1 is at the end.
+> Companion to the [Seed-First AI Act (draft v3.1)](seed_first_ai_act.md). The [research dossier](research_dossier.md) gives the formal model, and [`seed_first_guardrail`](../README.md) is the reference implementation. A summary of what changed from v1 is at the end.
 
 ## Executive Summary
 

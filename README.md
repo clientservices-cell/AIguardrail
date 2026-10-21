@@ -139,7 +139,8 @@ seed-first-guardrail check --policy policy/examples/tillit.policy.json \
 | Document | Contents |
 |---|---|
 | [Seed-First Framework v2.1](docs/framework.md) | The governance model, revised, with the guiding principle |
-| [Seed-First AI Act — draft v2.1](docs/seed_first_ai_act.md) | Model convention, revised, with change logs, Annex E (indicators and scorecards) and an article → code map |
+| [Scope statement](SCOPE.md) | What this project is, what it is not, the five supervisory precedents, and what it requires from others |
+| [Seed-First AI Act — draft v3.1](docs/seed_first_ai_act.md) | Model convention, revised, with change logs, Chapter VIA on supervision (instruments, assessors, internal supervisory function, frontier-model risk, rule-making), Annex E and an article → code map |
 | [Adversarial review](docs/adversarial_review.md) | 27 findings, fixes and status in 0.2.0, in two voices |
 | [Accountability KPIs](docs/accountability_kpis.md) | The 29 indicators and the model-rating method |
 | [Compliance agents](docs/compliance_agents.md) | The 13 early-warning agents |
