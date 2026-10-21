@@ -1,6 +1,6 @@
 # Scope — seed-first-guardrail as an instrument of supervision
 
-*Draft v1, 19 October 2026. Companion to the [Seed-First AI Act, draft v3.0](docs/seed_first_ai_act.md), Chapter VIA.*
+*Draft v1, 19 October 2026. Companion to the [Seed-First AI Act, draft v3.1](docs/seed_first_ai_act.md), Chapter VIA.*
 
 ## What this is
 
